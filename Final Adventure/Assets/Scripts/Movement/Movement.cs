@@ -1,226 +1,100 @@
-﻿using System.Collections.Generic;
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using Assets.Scripts.Model;
-using UnityEngine;
+using Assets.Scripts.Movement;
+using Assets.Scripts.Util;
 
-namespace Assets.Scripts.Movement
+public class Movement : MonoBehaviour
 {
-    public class Movement : MonoBehaviour {
+    private Character _character;
+    
+    private List<Vector3> _optimalMovementPath;
+    private Vector3 _nextTile;
+    private int _movementCount = 0;
 
-        private int _pointerPositionX = 2;
-        private int _pointerPositionY = 2;
-
-        private List<List<Tile>> _floorArray = new List<List<Tile>>();
-        private int _positionX = 0;
-        private int _positionY = 0;
-
-        public int MovementAllowance = 2;
-
-        // Use this for initialization
-        void Start () {
-
-            int i = 0;
-            foreach (Transform row in transform)
-            {
-                List<Tile> rowList = new List<Tile>();
-
-                foreach (Transform block in row)
-                {
-                    Tile tile = new Tile();
-                    tile.SetGameObject(block.gameObject);
-                    rowList.Add(tile);
-                }
-                _floorArray.Add(rowList);
-                i++;
-            }
-
-            _floorArray[_pointerPositionY][_pointerPositionX].SetMaterial(Tile.Highlight);
-        }
+    // Use this for initialization
+    void Start () {
+        _character = transform.GetComponent<CharacterHolder>().Character;
+    }
 	
-        // Update is called once per frame
-        void Update () {
-            KeyboardInput();
-        }
+	// Update is called once per frame
+	void Update ()
+	{
+	    KeyboardInput();
+	}
 
-        private void KeyboardInput()
+    private void KeyboardInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            if(Input.GetKeyDown(KeyCode.Return))
-            {
-                Tile tile = _floorArray[_pointerPositionY][_pointerPositionX];
-                if (tile.GetState() == Tile.State.Walkable)
-                {
-                    _positionX = _pointerPositionX;
-                    _positionY = _pointerPositionY;
-                    HighlLightNewPositionTile();
-                } 
-                else
-                {
-                    print("Not reachable");
-                }
-            
-            }
+            var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
+            var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
 
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            Tile tile = floor[(int) pointer.x, (int) pointer.y];
+            if (tile.GetState() == Tile.State.Walkable)
             {
-                if (_positionX > 0)
-                {
-                    _positionX--;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                if (_positionY > 0)
-                {
-                    _positionY--;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                if (_positionX < 5)
-                {
-                    _positionX++;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                if (_positionY < 3)
-                {
-                    _positionY++;
-                    HighlLightNewPositionTile();
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                if(_pointerPositionX > 0)
-                {
-                    ClearPointer();
-                    _pointerPositionX--;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.S))
-            {
-                if(_pointerPositionY > 0)
-                {
-                    ClearPointer();
-                    _pointerPositionY--;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.D))
-            {
-                if (_pointerPositionX < 5)
-                {
-                    ClearPointer();
-                    _pointerPositionX++;
-                    HighlLightNewPositionTile();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.W))
-            {
-                if (_pointerPositionY < 3)
-                {
-                    ClearPointer();
-                    _pointerPositionY++;
-                    HighlLightNewPositionTile();
-                }
+               SetPosition(new Vector3(pointer.x, tile.GetHeight(), pointer.y));
+                GameObject.Find("Floor").GetComponent<FloorHighlight>().SetNewPosition();
+                GameObject.Find("Floor").GetComponent<FloorHighlight>().HighlLightNewPositionTile();
             }
         }
 
-        private void ClearPointer()
+        if (transform.position != _character.Position)
         {
-            Tile tile = _floorArray[_pointerPositionY][_pointerPositionX];
-            tile.SetMaterial(Tile.Normal);
-        }
+            RotateCharacter();
 
-        private void MovePointer()
-        {
-            Tile tile = _floorArray[_pointerPositionY][_pointerPositionX];
-            tile.SetMaterial(Tile.Highlight);
-        }
-
-        private void HighlLightNewPositionTile()
-        {
-            Tile tile = _floorArray[_positionY][_positionX];
-            tile.SetMaterial(Tile.Normal);
-
-            HighlightMovementTiles();
-            MovePointer();
-        }
-
-        private void HighlightMovementTile(int positionX, int positionY)
-        {
-            Tile tile = _floorArray[positionY][positionX];
-            tile.SetMaterial(Tile.Walkpath);
-            tile.SetState(Tile.State.Walkable);
-        }
-
-        private void RemoveTileHighlight(Tile tile)
-        {
-            tile.SetMaterial(Tile.Normal);
-            tile.SetState(Tile.State.Unwalkable);
-        }
-
-        private void HighlightMovementTiles()
-        {
-            ClearFloor();
-
-            int startPositionY = _positionY - MovementAllowance;
-            int startPositionX = _positionX;
-
-            if (startPositionY < 0)
+            if (transform.position == _nextTile)
             {
-                startPositionY = 0;
-                startPositionX = _positionX - MovementAllowance;
-                if (startPositionX < 0) startPositionX = 0;
+                _movementCount++;
+                _nextTile = _optimalMovementPath[_movementCount];
             }
-
-            for(int y = startPositionY; y < _floorArray.Count; y++)
-            {
-
-                var currentY = y;
-                for(int x = 0; x < _floorArray[0].Count; x++)
-                { 
-                    var currentX = x;
-                    int differenceInX = CalculatePositiveDifference(_positionX, currentX);
-                    int differnceInY = CalculatePositiveDifference(_positionY, currentY);
-                    int totalDifference = differenceInX + differnceInY;
-
-                    if (totalDifference == 0) continue;
-                    if (totalDifference <= MovementAllowance)
-                    {
-                        HighlightMovementTile(currentX, currentY);
-                    }
-
-                }
-            }
+            float step = 2 * Time.deltaTime;
+            transform.position = Vector3.MoveTowards(transform.position, _nextTile, step);
         }
+    }
 
-        private void ClearFloor()
+    private void RotateCharacter()
+    {
+        if (transform.position.x < _nextTile.x)
         {
-            for(int y = 0; y < _floorArray.Count; y++)
-            {
-                for(int x = 0; x < _floorArray[0].Count; x++)
-                {
-                    RemoveTileHighlight(_floorArray[y][x]);
-                }
-            }
-        }
-
-        private int CalculatePositiveDifference(int valueOne, int valueTwo)
+            transform.forward = new Vector3(0, 0, 1f);
+        } 
+        else if (transform.position.x > _nextTile.x)
         {
-            if(valueOne > valueTwo)
-            {
-                return valueOne - valueTwo;
-            }
-            else
-            {
-                return valueTwo - valueOne;
-            }
-       
+            transform.forward = new Vector3(0, 0, -1f);
         }
+        else if (transform.position.z < _nextTile.z)
+        {
+            transform.forward = new Vector3(-1f, 0, 0);
+        }
+        else if (transform.position.z > _nextTile.z)
+        {
+            transform.forward = new Vector3(1f, 0, 0);
+        }
+    }
+
+    private void SetPosition(Vector3 position)
+    {
+        _character.Position = position;
+
+        CreateOptimalPath();
+    }
+
+    private void CreateOptimalPath()
+    {
+        bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
+
+        Vector2 startLocation = new Vector2(transform.position.x, transform.position.z);
+        Vector2 endLocation = new Vector2(_character.Position.x, _character.Position.z);
+
+        SearchParameters searchParameters = new SearchParameters(startLocation, endLocation, map);
+
+        AStar pathFinder = new AStar(searchParameters);
+        List<Vector2> flatPath = pathFinder.FindPath();
+
+        _optimalMovementPath = GameObject.Find("Floor").GetComponent<FloorHighlight>().AddTileHeights(flatPath);
+        _movementCount = 0;
+        _nextTile = _optimalMovementPath[_movementCount];
     }
 }

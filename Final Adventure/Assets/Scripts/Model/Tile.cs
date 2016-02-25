@@ -12,6 +12,8 @@ namespace Assets.Scripts.Model
 
         private State _currentState;
 
+        public Vector2 Position { get; private set; }
+
         public enum State
         {
             Walkable,
@@ -37,6 +39,7 @@ namespace Assets.Scripts.Model
         public void SetGameObject(GameObject tileGameObject)
         {
             _gameObject = tileGameObject;
+            Position = new Vector2(_gameObject.transform.position.x, _gameObject.transform.position.z);
         }
 
         public GameObject GetGameObject()
@@ -71,6 +74,11 @@ namespace Assets.Scripts.Model
         public State GetState()
         {
             return _currentState;
+        }
+
+        public float GetHeight()
+        {
+            return _gameObject.transform.position.y + 1;
         }
 
 
