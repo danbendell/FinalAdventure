@@ -59,6 +59,8 @@ public class CharacterHolder : MonoBehaviour
             DamageUtil damageUtil = new DamageUtil();
             int damageAmount = damageUtil.CalculatePhysicalDamage(Character, tempCharacter);
 
+            if(damageAmount == 0) print("MISS!!");
+
             Character.TakeDamage(damageAmount);
 	        _uiCharacterStats.UpdateCharacterStats(Character);
            
@@ -66,7 +68,10 @@ public class CharacterHolder : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.P))
 	    {
-	        Character.Heal(10);
+            DamageUtil damageUtil = new DamageUtil();
+	        int healAmount = damageUtil.CalculateHealAmount(Character);
+
+            Character.Heal(healAmount);
             _uiCharacterStats.UpdateCharacterStats(Character);
         }
 
