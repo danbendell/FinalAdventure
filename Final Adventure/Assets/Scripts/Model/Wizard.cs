@@ -6,8 +6,10 @@ namespace Assets.Scripts.Model
     {
         public Wizard()
         {
-            Health = 80;
-            Mana = 150;
+            MaxHealth = 20;
+            Health = 20;
+            MaxMana = 50;
+            Mana = 50;
 
             Strength = 4;
             Defence = 5;
@@ -18,12 +20,15 @@ namespace Assets.Scripts.Model
             Accuracy = 10;
             Evasion = 10;
             Luck = 5;
+            CritChance = 5;
         }
 
         public Wizard(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
-            int evasion, int luck)
+            int evasion, int luck, int critChance)
         {
+            MaxHealth = health;
             Health = health;
+            MaxMana = mana;
             Mana = mana;
 
             Strength = strength;
@@ -35,11 +40,12 @@ namespace Assets.Scripts.Model
             Accuracy = accuracy;
             Evasion = evasion;
             Luck = luck;
+            CritChance = critChance;
         }
 
         public override void WhoAmI()
         {
-            print("I am a Wizard");
+            //print("I am a Wizard");
         }
     }
 }

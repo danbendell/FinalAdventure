@@ -4,8 +4,10 @@
 
         public Archer()
         {
-            Health = 80;
-            Mana = 80;
+            MaxHealth = 22;
+            Health = 22;
+            MaxMana = 20;
+            Mana = 20;
 
             Strength = 10;
             Defence = 6;
@@ -16,10 +18,11 @@
             Accuracy = 20;
             Evasion = 15;
             Luck = 5;
+            CritChance = 8;
         }
 
         public Archer(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
-            int evasion, int luck)
+            int evasion, int luck, int critChance)
         {
             Health = health;
             Mana = mana;
@@ -33,11 +36,12 @@
             Accuracy = accuracy;
             Evasion = evasion;
             Luck = luck;
+            CritChance = critChance;
         }
 
         public new void WhoAmI()
         {
-            print("I am an Archer");
+            //print("I am an Archer");
         }
     }
 }

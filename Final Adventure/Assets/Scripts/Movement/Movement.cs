@@ -42,16 +42,21 @@ public class Movement : MonoBehaviour
 
         if (transform.position != _character.Position)
         {
-            RotateCharacter();
-
-            if (transform.position == _nextTile)
-            {
-                _movementCount++;
-                _nextTile = _optimalMovementPath[_movementCount];
-            }
-            float step = 2 * Time.deltaTime;
-            transform.position = Vector3.MoveTowards(transform.position, _nextTile, step);
+            MoveCharacter();
         }
+    }
+
+    private void MoveCharacter()
+    {
+        RotateCharacter();
+        if (transform.position == _nextTile)
+        {
+            _movementCount++;
+            _nextTile = _optimalMovementPath[_movementCount];
+        }
+
+        float step = 2 * Time.deltaTime;
+        transform.position = Vector3.MoveTowards(transform.position, _nextTile, step);
     }
 
     private void RotateCharacter()
