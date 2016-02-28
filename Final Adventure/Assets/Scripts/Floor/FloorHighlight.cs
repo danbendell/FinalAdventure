@@ -7,7 +7,7 @@ namespace Assets.Scripts.Movement
 {
     public class FloorHighlight : MonoBehaviour {
 
-        public Vector2 PointerPosition = new Vector2(2,2);
+        public Vector2 PointerPosition = new Vector2(0,0);
 
         public Tile[,] FloorArray;
         private Vector2 _position = new Vector2(0,0);
@@ -18,12 +18,13 @@ namespace Assets.Scripts.Movement
 
         public bool[,] FloorMap { get; private set; }
 
-        private int _movementAllowance = 2;
+        private int _movementAllowance = 0;
 
         public void SetMovement(Vector2 position, int speed)
         {
-            _position.x = position.x;
-            _position.y = position.y;
+            _position = position;
+            PointerPosition = position;
+
             _movementAllowance = speed;
             HighlLightNewPositionTile();
         }
@@ -41,6 +42,7 @@ namespace Assets.Scripts.Movement
                 {
                     Tile tile = new Tile();
                     tile.SetGameObject(transform.GetChild(y).GetChild(x).gameObject);
+                    tile.SetState(Tile.State.Unwalkable);
                     FloorArray[x, y] = tile;
                 }
             }
@@ -184,6 +186,18 @@ namespace Assets.Scripts.Movement
                     RemoveTileHighlight(FloorArray[x, y]);
                 }
             }
+        }
+
+        public void ResetFloorHighlight()
+        {
+            ClearFloor();
+            _movementAllowance = 0;
+            ShowPointer();
+        }
+
+        private void ShowPointer()
+        {
+            FloorArray[(int)PointerPosition.x, (int)PointerPosition.y].SetMaterial(Tile.Highlight);
         }
 
         private float CalculatePositiveDifference(float valueOne, float valueTwo)

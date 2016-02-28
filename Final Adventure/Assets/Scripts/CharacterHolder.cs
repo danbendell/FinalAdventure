@@ -11,8 +11,6 @@ public class CharacterHolder : MonoBehaviour
 
     public Character Character;
     private UICharacterStats _uiCharacterStats;
-    private float newHp;
-    private float newMp;
 
     public Jobs Job;
     public enum Jobs
@@ -34,6 +32,8 @@ public class CharacterHolder : MonoBehaviour
         }
         Character.Position = transform.position;
 
+        transform.GetComponent<Movement>().SetCharacter(Character);
+
         _uiCharacterStats = GameObject.Find("Canvas").GetComponent<UICharacterStats>();
         _uiCharacterStats.UpdateCharacterStats(Character);
         
@@ -45,12 +45,6 @@ public class CharacterHolder : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.L))
         {
             Character.WhoAmI();
-        }
-
-	    if (Input.GetKeyDown(KeyCode.M))
-	    {
-            Vector2 floorPosition = new Vector2(Character.Position.x, Character.Position.z);
-            GameObject.Find("Floor").GetComponent<FloorHighlight>().SetMovement(floorPosition, Character.Speed);
         }
 
         if (Input.GetKeyDown(KeyCode.O))
@@ -74,6 +68,11 @@ public class CharacterHolder : MonoBehaviour
             Character.Heal(healAmount);
             _uiCharacterStats.UpdateCharacterStats(Character);
         }
+    }
 
+    public void HighlightMovement()
+    {
+        Vector2 floorPosition = new Vector2(Character.Position.x, Character.Position.z);
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetMovement(floorPosition, Character.Speed);
     }
 }

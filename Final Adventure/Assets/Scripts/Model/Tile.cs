@@ -53,9 +53,11 @@ namespace Assets.Scripts.Model
             {
                 case Normal:
                     _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().NormalMaterial;
+                    SetState(State.Unwalkable);
                     return;
                 case Walkpath:
                     _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().WalkpathMaterial;
+                    SetState(State.Walkable);
                     return;
                 case Highlight:
                     _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().HighlightMaterial;
