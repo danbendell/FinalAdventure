@@ -10,7 +10,6 @@ public class CharacterHolder : MonoBehaviour
 {
 
     public Character Character;
-    private UICharacterStats _uiCharacterStats;
 
     public Jobs Job;
     public enum Jobs
@@ -33,46 +32,64 @@ public class CharacterHolder : MonoBehaviour
         Character.Position = transform.position;
 
         transform.GetComponent<Movement>().SetCharacter(Character);
-
-        _uiCharacterStats = GameObject.Find("Canvas").GetComponent<UICharacterStats>();
-        _uiCharacterStats.UpdateCharacterStats(Character);
         
     }
 	
 	// Update is called once per frame
 	void Update () {
+        KeyboardInput();
+    }
 
+    private void KeyboardInput()
+    {
         if (Input.GetKeyDown(KeyCode.L))
         {
             Character.WhoAmI();
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
-	    {
-            Character tempCharacter = new Archer();
-            DamageUtil damageUtil = new DamageUtil();
-            int damageAmount = damageUtil.CalculatePhysicalDamage(Character, tempCharacter);
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Character !=
+               Character) return;
 
-            if(damageAmount == 0) print("MISS!!");
+            var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
+            var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+            Tile tile = floor[(int)pointer.x, (int)pointer.y];
 
-            Character.TakeDamage(damageAmount);
-	        _uiCharacterStats.UpdateCharacterStats(Character);
-           
-	    }
+            if (GameObject.Find("ActionBar").GetComponent<ActionBar>().Action == ActionBarItem.Actions.Attack)
+            {
+                if (tile.GetState() != Tile.State.Attackable) return;
+                print("Attack");
+                transform.GetComponent<Damage>().Attack(Character, pointer);
+            }
+
+            if (GameObject.Find("ActionBar").GetComponent<ActionBar>().Action == ActionBarItem.Actions.Move)
+            {
+                if (tile.GetState() != Tile.State.Walkable) return;
+                print("Move");
+                transform.GetComponent<Movement>().SetPosition(tile, pointer);
+            }
+                
+        }
 
         if (Input.GetKeyDown(KeyCode.P))
-	    {
+        {
             DamageUtil damageUtil = new DamageUtil();
-	        int healAmount = damageUtil.CalculateHealAmount(Character);
+            int healAmount = damageUtil.CalculateHealAmount(Character);
 
             Character.Heal(healAmount);
-            _uiCharacterStats.UpdateCharacterStats(Character);
         }
     }
 
     public void HighlightMovement()
     {
-        Vector2 floorPosition = new Vector2(Character.Position.x, Character.Position.z);
-        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetMovement(floorPosition, Character.Speed);
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetMovement(Character.XyPosition(), Character.Speed);
     }
+
+    public void HighlightAttackRange()
+    {
+        //needs to have some sort of attack range instead of one
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetAttackRange(Character.XyPosition(), 1);
+    }
+
 }

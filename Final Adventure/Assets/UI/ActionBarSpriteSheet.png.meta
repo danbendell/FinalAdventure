@@ -1,0 +1,200 @@
+fileFormatVersion: 2
+guid: 141c4471138cac54999d9202c3ba0ca2
+timeCreated: 1456756023
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: ActionBarSpriteSheet_0
+    21300002: ActionBarSpriteSheet_1
+    21300004: ActionBarSpriteSheet_2
+    21300006: ActionBarSpriteSheet_3
+    21300008: ActionBarSpriteSheet_4
+    21300010: ActionBarSpriteSheet_5
+    21300012: ActionBarSpriteSheet_6
+    21300014: ActionBarSpriteSheet_7
+    21300016: ActionBarSpriteSheet_8
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: ActionBarSpriteSheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 193
+        width: 579
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 289.5, y: 31}
+        - {x: 99.5, y: 31}
+        - {x: -259.5, y: 25}
+        - {x: -267.5, y: 18}
+        - {x: -289.5, y: -13}
+        - {x: -289.5, y: -31}
+        - {x: -235.5, y: -31}
+        - {x: -230.5, y: -25}
+        - {x: 259.5, y: -26}
+        - {x: 289.5, y: 13}
+    - name: ActionBarSpriteSheet_1
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 126
+        width: 206
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -103, y: 25.5}
+        - {x: -103, y: -25.5}
+        - {x: 88, y: -25.5}
+        - {x: 97, y: -4.5}
+        - {x: 103, y: 16.5}
+        - {x: 103, y: 25.5}
+    - name: ActionBarSpriteSheet_2
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 126
+        width: 301
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -150.5, y: 25.5}
+        - {x: -150.5, y: -25.5}
+        - {x: 136.5, y: -25.5}
+        - {x: 150.5, y: 13.5}
+        - {x: 150.5, y: 25.5}
+    - name: ActionBarSpriteSheet_3
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 60
+        width: 207
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -103.5, y: 25.5}
+        - {x: -103.5, y: -25.5}
+        - {x: 103.5, y: -25.5}
+        - {x: 103.5, y: 25.5}
+    - name: ActionBarSpriteSheet_4
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 65
+        width: 301
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -150.5, y: 25.5}
+        - {x: -150.5, y: -25.5}
+        - {x: 135.5, y: -25.5}
+        - {x: 150.5, y: 15.5}
+        - {x: 150.5, y: 25.5}
+    - name: ActionBarSpriteSheet_5
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 0
+        width: 207
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -103.5, y: 25.5}
+        - {x: -103.5, y: 10.5}
+        - {x: -88.5, y: -25.5}
+        - {x: 103.5, y: -25.5}
+        - {x: 103.5, y: 25.5}
+    - name: ActionBarSpriteSheet_6
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 46
+        width: 250
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: ActionBarSpriteSheet_7
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 31
+        width: 250
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: ActionBarSpriteSheet_8
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 17
+        width: 250
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

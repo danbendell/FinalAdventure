@@ -7,6 +7,7 @@ namespace Assets.Scripts.Model
         public Material NormalMaterial;
         public Material WalkpathMaterial;
         public Material HighlightMaterial;
+        public Material AttackMaterial;
 
         // Use this for initialization
         void Start () {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Assets.Scripts.Model;
 using UnityEditorInternal;
 using UnityEngine;
@@ -18,14 +19,29 @@ namespace Assets.Scripts.Movement
 
         public bool[,] FloorMap { get; private set; }
 
-        private int _movementAllowance = 0;
+        private string _material = Tile.Normal;
+
+        private int _tileAllowance = 0;
 
         public void SetMovement(Vector2 position, int speed)
         {
             _position = position;
             PointerPosition = position;
 
-            _movementAllowance = speed;
+            _material = Tile.Walkpath;
+
+            _tileAllowance = speed;
+            HighlLightNewPositionTile();
+        }
+
+        public void SetAttackRange(Vector2 position, int range)
+        {
+            _position = position;
+            PointerPosition = position;
+
+            _material = Tile.Attack;
+
+            _tileAllowance = range;
             HighlLightNewPositionTile();
         }
 
@@ -118,15 +134,14 @@ namespace Assets.Scripts.Movement
             Tile tile = FloorArray[(int) _position.x, (int) _position.y];
             tile.SetMaterial(Tile.Normal);
 
-            HighlightMovementTiles();
+            HighllightTilesWith(Tile.Attack);
             MovePointer();
         }
 
         private void HighlightMovementTile(int positionX, int positionY)
         {
             Tile tile = FloorArray[positionX, positionY];
-            tile.SetMaterial(Tile.Walkpath);
-            tile.SetState(Tile.State.Walkable);
+            tile.SetMaterial(_material);
         }
 
         private void RemoveTileHighlight(Tile tile)
@@ -135,24 +150,23 @@ namespace Assets.Scripts.Movement
             tile.SetState(Tile.State.Unwalkable);
         }
 
-        private void HighlightMovementTiles()
+        private void HighllightTilesWith(string material)
         {
             ClearFloor();
 
             Vector2 startPosition;
-            startPosition.y = _position.y - _movementAllowance;
+            startPosition.y = _position.y - _tileAllowance;
             startPosition.x = _position.x;
 
             if (startPosition.y < 0)
             {
                 startPosition.y = 0;
-                startPosition.x = _position.x - _movementAllowance;
+                startPosition.x = _position.x - _tileAllowance;
                 if (startPosition.x < 0) startPosition.x = 0;
             }
 
             for(int y = (int) startPosition.y; y < Height; y++)
             {
-
                 var currentY = y;
                 for(int x = 0; x < Width; x++)
                 { 
@@ -162,7 +176,7 @@ namespace Assets.Scripts.Movement
                     float totalDifference = differenceInX + differnceInY;
 
                     if (totalDifference == 0) continue;
-                    if (totalDifference <= _movementAllowance)
+                    if (totalDifference <= _tileAllowance)
                     {
                         HighlightMovementTile(currentX, currentY);
                     }
@@ -191,7 +205,7 @@ namespace Assets.Scripts.Movement
         public void ResetFloorHighlight()
         {
             ClearFloor();
-            _movementAllowance = 0;
+            _tileAllowance = 0;
             ShowPointer();
         }
 

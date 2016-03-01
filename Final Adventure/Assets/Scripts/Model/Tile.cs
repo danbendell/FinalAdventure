@@ -9,6 +9,7 @@ namespace Assets.Scripts.Model
         public const string Normal = "Normal";
         public const string Walkpath = "Walkpath";
         public const string Highlight = "Highlight";
+        public const string Attack = "Attack";
 
         private State _currentState;
 
@@ -18,6 +19,7 @@ namespace Assets.Scripts.Model
         {
             Walkable,
             Unwalkable,
+            Attackable
         };    
 
         // Use this for initialization
@@ -61,6 +63,10 @@ namespace Assets.Scripts.Model
                     return;
                 case Highlight:
                     _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().HighlightMaterial;
+                    return;
+                case Attack:
+                    _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().AttackMaterial;
+                    SetState(State.Attackable);
                     return;
                 default:
                     _gameObject.GetComponent<Renderer>().material = _gameObject.GetComponent<Materials>().NormalMaterial;

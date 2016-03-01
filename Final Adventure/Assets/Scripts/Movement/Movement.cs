@@ -31,27 +31,17 @@ public class Movement : MonoBehaviour
 
     private void KeyboardInput()
     {
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            if (GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Character !=
-                _character) return;
-
-            var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
-            var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
-
-            Tile tile = floor[(int)pointer.x, (int)pointer.y];
-            if (tile.GetState() == Tile.State.Walkable)
-            {
-                SetPosition(new Vector3(pointer.x, tile.GetHeight(), pointer.y));
-                GameObject.Find("Floor").GetComponent<FloorHighlight>().SetNewPosition();
-                GameObject.Find("Floor").GetComponent<FloorHighlight>().HighlLightNewPositionTile();
-            }
-        }
-
         if (transform.position != _character.Position)
         {
             MoveCharacter();
         }
+    }
+
+    public void SetPosition(Tile tile, Vector2 pointer)
+    {
+        SetPosition(new Vector3(pointer.x, tile.GetHeight(), pointer.y));
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetNewPosition();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().HighlLightNewPositionTile();
     }
 
     private void MoveCharacter()

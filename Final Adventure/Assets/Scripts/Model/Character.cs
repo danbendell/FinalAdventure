@@ -59,5 +59,15 @@ namespace Assets.Scripts.Model
 
             if (Health > MaxHealth) Health = MaxHealth;
         }
+
+        public Vector2 XyPosition()
+        {
+            return new Vector2(Position.x, Position.z);
+        }
+
+        public float Height()
+        {
+            return Position.y;
+        }
     }
 }
