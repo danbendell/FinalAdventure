@@ -29,7 +29,7 @@ public class StatsBar : MonoBehaviour {
 
     public void Show()
     {
-        _enabled = true;
+         _enabled = true;
     }
 
     public void Hide()

@@ -6,9 +6,21 @@ using Assets.Scripts.Movement;
 
 public class CharactersController : MonoBehaviour
 {
-    public List<CharacterHolder> CharacterHolders; 
+    public List<CharacterHolder> CharacterHolders;
 
-    public CharacterHolder CurrentCharacterHolder { get; set; }
+
+    private CharacterHolder _currentCharacterHolder;
+
+    public CharacterHolder CurrentCharacterHolder
+    {
+        get { return _currentCharacterHolder; }
+        set
+        {
+            _currentCharacterHolder = value;
+            _currentCharacterHolder.Turn = new Turn();
+            GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(_currentCharacterHolder.Character.XyPosition());
+        }
+    }
 
     private UICharacterStats _uiCharacterStats;
 
@@ -29,22 +41,31 @@ public class CharactersController : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-	    if (Input.GetKeyDown(KeyCode.K))
-	    {
-	        if (CurrentCharacterHolder == transform.GetChild(0).GetComponent<CharacterHolder>())
-	            CurrentCharacterHolder = transform.GetChild(1).GetComponent<CharacterHolder>();
-            else CurrentCharacterHolder = transform.GetChild(0).GetComponent<CharacterHolder>();
-        }
+	    CheckTurnStatus();
+	    CheckPointerPosition();        
+    }
 
-	    CheckPointerPosition();
-        
+    private void CheckTurnStatus()
+    {
+        if (!CurrentCharacterHolder.Turn.Complete()) return;
+        NextPlayer();
+    }
+
+    private void NextPlayer()
+    {
+        for (var i = 0; i < CharacterHolders.Count; i++)
+        {
+            if (CharacterHolders[i] != CurrentCharacterHolder) continue;
+            CurrentCharacterHolder = i + 1 >= CharacterHolders.Count ? CharacterHolders[0] : CharacterHolders[i + 1];
+            break;
+        }
     }
 
     private void CheckPointerPosition()
     {
         for (var i = 0; i < CharacterHolders.Count; i++)
         {
-            Vector2 characterPos = new Vector2(CharacterHolders[i].Character.Position.x, CharacterHolders[i].Character.Position.z);
+            Vector2 characterPos = CharacterHolders[i].Character.XyPosition();
             if (GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition == characterPos)
             {
                 _uiCharacterStats.UpdateCharacterStats(CharacterHolders[i].Character);

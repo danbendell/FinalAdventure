@@ -9,6 +9,9 @@ public class Damage : MonoBehaviour
     private Character Attacker { get; set; }
     private Character Defender { get; set; }
 
+    private Character Healer { get; set; }
+    private Character Reciever { get; set; }
+
 	// Use this for initialization
 	void Start () {
 	
@@ -22,7 +25,7 @@ public class Damage : MonoBehaviour
     public void Attack(Character attacker, Vector2 pointer)
     {
         Attacker = attacker;
-        FindDefender(pointer);
+        Defender = FindCharacter(pointer);
         if (Defender == null) return;
 
         DamageUtil damageUtil = new DamageUtil();
@@ -32,8 +35,20 @@ public class Damage : MonoBehaviour
 
         Defender.TakeDamage(damageAmount);
     }
+
+    public void Heal(Character healer, Vector2 pointer)
+    {
+        Healer = healer;
+        Reciever = FindCharacter(pointer);
+        if (Reciever == null) return;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int healAmount = damageUtil.CalculateHealAmount(Healer);
+
+        Healer.Heal(Reciever, healAmount);
+    }
     
-    private void FindDefender(Vector2 pointer)
+    private Character FindCharacter(Vector2 pointer)
     {
         List<CharacterHolder> characterHolders =
             GameObject.Find("Characters").GetComponent<CharactersController>().CharacterHolders;
@@ -42,7 +57,9 @@ public class Damage : MonoBehaviour
         foreach (CharacterHolder CH in characterHolders)
         {
             if (CH.Character.XyPosition() != pointer) continue;
-            Defender = CH.Character;
+            return CH.Character;
         }
+
+        return null;
     }
 }

@@ -46,18 +46,18 @@ namespace Assets.Scripts.Model
             if (Health < 0) Health = 0;
         }
 
-        public void Heal(int amount)
+        public void Heal(Character reciever, int amount)
         {
             var manaCost = 10;
             if (Mana - manaCost < 0) return;
 
-            if (Health < MaxHealth)
+            if (reciever.Health < reciever.MaxHealth)
             {
                 Mana -= manaCost;
-                Health += amount;
+                reciever.Health += amount;
             }  
 
-            if (Health > MaxHealth) Health = MaxHealth;
+            if (reciever.Health > reciever.MaxHealth) reciever.Health = reciever.MaxHealth;
         }
 
         public Vector2 XyPosition()

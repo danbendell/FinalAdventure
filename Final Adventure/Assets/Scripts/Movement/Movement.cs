@@ -9,9 +9,17 @@ public class Movement : MonoBehaviour
 {
     private Character _character;
     
-    private List<Vector3> _optimalMovementPath;
+    private List<Vector3> _optimalMovementPath = new List<Vector3>();
     private Vector3 _nextTile;
     private int _movementCount = 0;
+
+    public States State = States.NotMoved;
+    public enum States
+    {
+        NotMoved,
+        Moving,
+        AtDestination
+    }
 
     // Use this for initialization
     void Start () {
@@ -21,20 +29,32 @@ public class Movement : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-	    KeyboardInput();
-	}
+        if (transform.position != _character.Position)
+        { 
+            MoveCharacter();
+        }
+	    CheckIfCharacterIsAtDestination();
+    }
+
+    private void CheckIfCharacterIsAtDestination()
+    {
+        if (_optimalMovementPath.Count <= 0) return;
+        if (transform.position == _optimalMovementPath[_optimalMovementPath.Count - 1])
+        {
+           State = States.AtDestination;
+            GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+            _optimalMovementPath = new List<Vector3>();
+        }
+    }
+
+    public bool Moving()
+    {
+        return transform.position != _character.Position;
+    }
 
     public void SetCharacter(Character character)
     {
         _character = character;
-    }
-
-    private void KeyboardInput()
-    {
-        if (transform.position != _character.Position)
-        {
-            MoveCharacter();
-        }
     }
 
     public void SetPosition(Tile tile, Vector2 pointer)
@@ -46,6 +66,7 @@ public class Movement : MonoBehaviour
 
     private void MoveCharacter()
     {
+        State = States.Moving;
         RotateCharacter();
         if (transform.position == _nextTile)
         {

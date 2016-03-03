@@ -1,14 +1,26 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public abstract class MenuBar : MonoBehaviour {
 
     public List<MenuBarItem> Items = new List<MenuBarItem>();
+    public GameObject ParentScrollBar;
 
     protected float EnabledXPosition = -81f;
     protected float DisabledXPosition = 53f;
     protected float HiddenXPosition = 120f;
+
+    protected float ScrollPosition = 1;
+    protected float ScrollPercent;
+
+    private int _selectedPosition = 1;
+    private int _upperBound = 1;
+    private int _lowerBound = 4;
+
+    public bool Animating = false;
 
     public States State;
     public enum States
@@ -19,9 +31,14 @@ public abstract class MenuBar : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
-	
-	}
+    public void Init () {
+
+        DisabledXPosition = ParentScrollBar.transform.GetComponent<RectTransform>().anchoredPosition3D.x +
+                              (ParentScrollBar.transform.GetComponent<RectTransform>().sizeDelta.x * 0.65f);
+        EnabledXPosition = ParentScrollBar.transform.GetComponent<RectTransform>().anchoredPosition3D.x;
+        HiddenXPosition = ParentScrollBar.transform.GetComponent<RectTransform>().anchoredPosition3D.x +
+                          ParentScrollBar.transform.GetComponent<RectTransform>().sizeDelta.x;
+    }
 	
 	// Update is called once per frame
 	public void UpdateMenu () {
@@ -44,8 +61,47 @@ public abstract class MenuBar : MonoBehaviour {
             if (State == States.Enabled) HighlightPreviousMenuItem();
         }
 
+	    Scroll();
+
         AnimateMenuBar();
 
+    }
+
+    private void Scroll()
+    {
+        if (State != States.Enabled) return;
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            _selectedPosition--;
+            if (_selectedPosition < 1) _selectedPosition = 1;
+            if (ScrollPosition < 1)
+            {
+                if (_selectedPosition == _upperBound)
+                {
+                    _lowerBound--;
+                    _upperBound--;
+                    ScrollPosition += ScrollPercent;
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            _selectedPosition++;
+            if (_selectedPosition > Items.Count) _selectedPosition = Items.Count;
+            if (ScrollPosition > 0)
+            {
+                if (_selectedPosition == _lowerBound)
+                {
+                    _lowerBound ++;
+                    _upperBound ++;
+                    ScrollPosition -= ScrollPercent;
+                }
+            }
+        }
+
+        ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
     }
 
     private void AnimateMenuBar()
@@ -76,40 +132,53 @@ public abstract class MenuBar : MonoBehaviour {
 
     private void Animate(float x)
     {
-        transform.GetComponent<RectTransform>().anchoredPosition3D =
-                Vector3.Lerp(transform.GetComponent<RectTransform>().anchoredPosition3D, new Vector3(x, transform.GetComponent<RectTransform>().anchoredPosition3D.y, transform.GetComponent<RectTransform>().anchoredPosition3D.z), 5 * Time.deltaTime);
+        Animating = false;
+        if (Math.Abs(ParentScrollBar.GetComponent<RectTransform>().anchoredPosition3D.x - x) > 50f)
+        {
+            Animating = true;
+        }
+        ParentScrollBar.GetComponent<RectTransform>().anchoredPosition3D =
+        Vector3.Lerp(ParentScrollBar.GetComponent<RectTransform>().anchoredPosition3D, new Vector3(x, ParentScrollBar.GetComponent<RectTransform>().anchoredPosition3D.y, ParentScrollBar.GetComponent<RectTransform>().anchoredPosition3D.z), 5 * Time.deltaTime);
+    }
+
+    public virtual void Show()
+    {
+        State = States.Enabled;
     }
 
     public void HighlightNextMenuItem()
     {
         for (var i = 0; i < Items.Count; i++)
         {
-            if (Items[i].Active)
-            {
-                if (i < Items.Count - 1)
-                {
-                    Items[i].Active = false;
-                    Items[i + 1].Active = true;
-                    return;
-                }
-            }
-        }
+            if (!Items[i].Active) continue;
+            if (i >= Items.Count - 1) continue;
 
+            Items[i].Active = false;
+            for (var x = i + 1; x < Items.Count; x++)
+            {
+                if (Items[x].Disabled()) continue;
+                Items[x].Active = true;
+                break;
+            }
+            return;
+        }
     }
 
     public void HighlightPreviousMenuItem()
     {
         for (var i = 0; i < Items.Count; i++)
         {
-            if (Items[i].Active)
+            if (!Items[i].Active) continue;
+            if (i <= 0) continue;
+
+            Items[i].Active = false;
+            for (var x = i - 1; x >= 0; x--)
             {
-                if (i > 0)
-                {
-                    Items[i].Active = false;
-                    Items[i - 1].Active = true;
-                    return;
-                }
+                if (Items[x].Disabled()) continue;
+                Items[x].Active = true;
+                break;
             }
+            return;
         }
     }
 

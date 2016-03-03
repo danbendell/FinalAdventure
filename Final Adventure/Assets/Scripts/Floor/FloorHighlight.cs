@@ -45,6 +45,14 @@ namespace Assets.Scripts.Movement
             HighlLightNewPositionTile();
         }
 
+        public void SetPointerPosition(Vector2 position)
+        {
+            _position = position;
+            PointerPosition = position;
+            
+            HighlLightNewPositionTile();
+        }
+
         // Use this for initialization
         void Start ()
         {
@@ -134,7 +142,7 @@ namespace Assets.Scripts.Movement
             Tile tile = FloorArray[(int) _position.x, (int) _position.y];
             tile.SetMaterial(Tile.Normal);
 
-            HighllightTilesWith(Tile.Attack);
+            HighllightTilesWith();
             MovePointer();
         }
 
@@ -150,7 +158,7 @@ namespace Assets.Scripts.Movement
             tile.SetState(Tile.State.Unwalkable);
         }
 
-        private void HighllightTilesWith(string material)
+        private void HighllightTilesWith()
         {
             ClearFloor();
 
@@ -175,7 +183,7 @@ namespace Assets.Scripts.Movement
                     float differnceInY = CalculatePositiveDifference(_position.y, currentY);
                     float totalDifference = differenceInX + differnceInY;
 
-                    if (totalDifference == 0) continue;
+                    if (totalDifference == 0 && _material == Tile.Walkpath) continue;
                     if (totalDifference <= _tileAllowance)
                     {
                         HighlightMovementTile(currentX, currentY);
@@ -204,6 +212,7 @@ namespace Assets.Scripts.Movement
 
         public void ResetFloorHighlight()
         {
+            _material = Tile.Normal;
             ClearFloor();
             _tileAllowance = 0;
             ShowPointer();
