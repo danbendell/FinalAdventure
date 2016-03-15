@@ -21,10 +21,12 @@ namespace Assets.Scripts.Model
             Evasion = 10;
             Luck = 5;
             CritChance = 5;
+
+            AttackRange = 1;
         }
 
         public Wizard(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
-            int evasion, int luck, int critChance)
+            int evasion, int luck, int critChance, int attackRange)
         {
             MaxHealth = health;
             Health = health;
@@ -41,6 +43,8 @@ namespace Assets.Scripts.Model
             Evasion = evasion;
             Luck = luck;
             CritChance = critChance;
+
+            AttackRange = attackRange;
         }
 
         public override void WhoAmI()

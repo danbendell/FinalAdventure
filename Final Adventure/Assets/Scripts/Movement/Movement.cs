@@ -68,7 +68,7 @@ public class Movement : MonoBehaviour
     {
         State = States.Moving;
         RotateCharacter();
-        if (transform.position == _nextTile)
+        if (transform.position == _nextTile && _movementCount <= _character.Speed)
         {
             _movementCount++;
             _nextTile = _optimalMovementPath[_movementCount];

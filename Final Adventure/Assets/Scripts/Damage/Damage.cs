@@ -22,11 +22,11 @@ public class Damage : MonoBehaviour
 	
 	}
 
-    public void Attack(Character attacker, Vector2 pointer)
+    public bool Attack(Character attacker, Vector2 pointer)
     {
         Attacker = attacker;
         Defender = FindCharacter(pointer);
-        if (Defender == null) return;
+        if (Defender == null) return false;
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculatePhysicalDamage(Defender, Attacker);
@@ -34,18 +34,21 @@ public class Damage : MonoBehaviour
         if (damageAmount == 0) print("MISS!!");
 
         Defender.TakeDamage(damageAmount);
+
+        return true;
     }
 
-    public void Heal(Character healer, Vector2 pointer)
+    public bool Heal(Character healer, Vector2 pointer)
     {
         Healer = healer;
         Reciever = FindCharacter(pointer);
-        if (Reciever == null) return;
+        if (Reciever == null) return false;
 
         DamageUtil damageUtil = new DamageUtil();
         int healAmount = damageUtil.CalculateHealAmount(Healer);
 
         Healer.Heal(Reciever, healAmount);
+        return true;
     }
     
     private Character FindCharacter(Vector2 pointer)

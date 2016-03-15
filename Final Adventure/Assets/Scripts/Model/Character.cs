@@ -34,6 +34,8 @@ namespace Assets.Scripts.Model
 
         public Vector3 Position { get; set; }
 
+        public int AttackRange { get; set; }
+
         public virtual void WhoAmI()
         {
             //print("I am a Character");

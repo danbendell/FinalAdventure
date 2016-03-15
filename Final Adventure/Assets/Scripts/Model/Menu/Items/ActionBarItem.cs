@@ -53,6 +53,10 @@ public class ActionBarItem : MenuBarItem
                 if (turn.CompletedAction) DisableItem();
                 else EnableItem();
                 break;
+            case Actions.Wait:
+                if(turn.CompletedAction && turn.Moved) DisableItem();
+                else EnableItem();
+                break;
         }
     }
 
@@ -80,7 +84,7 @@ public class ActionBarItem : MenuBarItem
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Enabled;
                 break;
             case Actions.Wait:
-
+                GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Skip();
                 break;
         }
     }

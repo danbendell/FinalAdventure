@@ -40,7 +40,8 @@ public class ActionBar : MenuBar
 
         if (Items.Count > 0) Items[0].Active = true;
 
-        ScrollPercent = 1 / (float)(_abilities.Count - 4);
+        var overFlowItems = _abilities.Count - 4;
+        if(overFlowItems > 0) ScrollPercent = 1 / (float) overFlowItems;
 
         ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
     }

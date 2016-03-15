@@ -45,11 +45,18 @@ namespace Assets.Scripts.Movement
             HighlLightNewPositionTile();
         }
 
-        public void SetPointerPosition(Vector2 position)
+        public void SetPosition(Vector2 position)
         {
             _position = position;
             PointerPosition = position;
             
+            HighlLightNewPositionTile();
+        }
+
+        public void SetPointerPosition(Vector2 position)
+        {
+            ClearPointer();
+            PointerPosition = position;
             HighlLightNewPositionTile();
         }
 

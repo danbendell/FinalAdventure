@@ -11,6 +11,7 @@ public class CharacterHolder : MonoBehaviour
 
     public Character Character;
     public Turn Turn;
+    public bool IsAi;
     
 
     public Jobs Job;
@@ -78,14 +79,12 @@ public class CharacterHolder : MonoBehaviour
         if (GameObject.Find("AbilityBar").GetComponent<AbilityBar>().Animating) return;
         if (GameObject.Find("ActionBar").GetComponent<ActionBar>().Animating) return;
 
+        Abilities abilities = new Abilities(Character, pointer);
+
         if (action == ActionBarItem.Actions.Attack)
         {
             if (tile.GetState() != Tile.State.Attackable) return;
-            transform.GetComponent<Damage>().Attack(Character, pointer);
-            Turn.CompletedAction = true;
-            GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
-            GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
-            GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+            abilities.Attack();
         }
 
         if (action == ActionBarItem.Actions.Move)
@@ -98,16 +97,11 @@ public class CharacterHolder : MonoBehaviour
 
         if (action == ActionBarItem.Actions.Magic)
         {
-            if (GameObject.Find("AbilityBar").GetComponent<AbilityBar>().Animating) return;
             AbilityBarItem.Actions magic = GameObject.Find("AbilityBar").GetComponent<AbilityBar>().Action;
             if (magic == AbilityBarItem.Actions.Heal)
             {
                 if (tile.GetState() != Tile.State.Attackable) return;
-                transform.GetComponent<Damage>().Heal(Character, pointer);
-                Turn.CompletedAction = true;
-                GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
-                GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
-                GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+                abilities.Heal();
             }
 
         }

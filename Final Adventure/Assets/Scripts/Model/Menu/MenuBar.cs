@@ -14,7 +14,7 @@ public abstract class MenuBar : MonoBehaviour {
     protected float HiddenXPosition = 120f;
 
     protected float ScrollPosition = 1;
-    protected float ScrollPercent;
+    protected float ScrollPercent = 1;
 
     private int _selectedPosition = 1;
     private int _upperBound = 1;

@@ -18,7 +18,8 @@ public class CharactersController : MonoBehaviour
         {
             _currentCharacterHolder = value;
             _currentCharacterHolder.Turn = new Turn();
-            GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(_currentCharacterHolder.Character.XyPosition());
+            GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
+            if(_currentCharacterHolder.IsAi) transform.GetChild(1).GetComponent<AI>().BeginTurn();
         }
     }
 

@@ -19,10 +19,12 @@
             Evasion = 15;
             Luck = 5;
             CritChance = 8;
+
+            AttackRange = 5;
         }
 
         public Archer(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
-            int evasion, int luck, int critChance)
+            int evasion, int luck, int critChance, int attackRange)
         {
             Health = health;
             Mana = mana;
@@ -37,6 +39,7 @@
             Evasion = evasion;
             Luck = luck;
             CritChance = critChance;
+            AttackRange = attackRange;
         }
 
         public new void WhoAmI()
