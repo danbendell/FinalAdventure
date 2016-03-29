@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 
 public class CharactersController : MonoBehaviour
 {
     public List<CharacterHolder> CharacterHolders;
-
+    private int _turnNumber = 0;
 
     private CharacterHolder _currentCharacterHolder;
 
@@ -19,7 +20,7 @@ public class CharactersController : MonoBehaviour
             _currentCharacterHolder = value;
             _currentCharacterHolder.Turn = new Turn();
             GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
-            if(_currentCharacterHolder.IsAi) transform.GetChild(1).GetComponent<AI>().BeginTurn();
+            if(_currentCharacterHolder.IsAi) transform.GetChild(_turnNumber).GetComponent<AI>().BeginTurn();
         }
     }
 
@@ -57,7 +58,8 @@ public class CharactersController : MonoBehaviour
         for (var i = 0; i < CharacterHolders.Count; i++)
         {
             if (CharacterHolders[i] != CurrentCharacterHolder) continue;
-            CurrentCharacterHolder = i + 1 >= CharacterHolders.Count ? CharacterHolders[0] : CharacterHolders[i + 1];
+            _turnNumber = i + 1 >= CharacterHolders.Count ? 0 : i + 1;
+            CurrentCharacterHolder = CharacterHolders[_turnNumber];
             break;
         }
     }
@@ -99,5 +101,16 @@ public class CharactersController : MonoBehaviour
     private void HideMovement()
     {
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+    }
+
+    public void FillMap(bool[,] map)
+    {
+        foreach (var holder in CharacterHolders)
+        {
+            if(holder == CurrentCharacterHolder) continue;
+            
+            var position = holder.Character.XyPosition();
+            map[(int)position.x, (int)position.y] = false;
+        }
     }
 }

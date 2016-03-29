@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Damage;
+using UnityEngine;
 
 namespace Assets.Scripts.Model
 {
@@ -41,25 +42,43 @@ namespace Assets.Scripts.Model
             //print("I am a Character");
         }
 
-        public void TakeDamage(int amount)
+        public void Attack(Character defender, int amount)
         {
-            if(Health > 0)
-                Health -= amount;
-            if (Health < 0) Health = 0;
+            if(defender.Health > 0)
+                defender.Health -= amount;
+            if (defender.Health < 0) defender.Health = 0;
         }
 
-        public void Heal(Character reciever, int amount)
+        public bool Heal(Character reciever, int amount)
         {
-            var manaCost = 10;
-            if (Mana - manaCost < 0) return;
+            
+            if (Mana - Damage.Heal.Cost < 0) return false;
+            if (reciever.Health == reciever.MaxHealth) return false;
 
             if (reciever.Health < reciever.MaxHealth)
             {
-                Mana -= manaCost;
+                Mana -= (int) Damage.Heal.Cost;
                 reciever.Health += amount;
             }  
 
             if (reciever.Health > reciever.MaxHealth) reciever.Health = reciever.MaxHealth;
+
+            return true;
+        }
+
+        public bool Flare(Character defender, int damage)
+        {
+            if (Mana - Damage.Flare.Cost < 0) return false;
+
+            if (defender.Health > 0)
+            {
+                Mana -= (int )Damage.Flare.Cost;
+                defender.Health -= damage;
+            }
+
+            if (defender.Health < 0) defender.Health = 0;
+
+            return true;
         }
 
         public Vector2 XyPosition()

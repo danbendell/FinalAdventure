@@ -39,6 +39,7 @@ public class BayesianProbability
                 Move = ProbabilityOfMovement(characterHolder),
                 Heal = ProbabilityOfHealNew(characterHolder)
             };
+            characterHolder.Probabilities = cp;
             _characterProbabilities.Add(cp);
         }
     }
@@ -64,6 +65,8 @@ public class BayesianProbability
         float result = (allies * (health * stats)) * mod;
         result = Mathf.Round(result * 100f) / 100f;
         if (result > 1f) result = 1f;
+
+        if (!InAttackRange(_AI, characterHolder)) result = 0f;
         return result;
     }
 
@@ -221,11 +224,11 @@ public class BayesianProbability
         return Mathf.Round(value * 100f) / 100f;
     }
 
-    private bool InAttackRange(CharacterHolder characterHolder, CharacterHolder otherCharacterHolder)
+    private bool InAttackRange(CharacterHolder defender, CharacterHolder attacker)
     {
-        var distanceFromAI = CalcDistance(characterHolder, otherCharacterHolder);
-        var attackRange = otherCharacterHolder.Character.AttackRange;
-        var movementRange = otherCharacterHolder.Character.Speed;
+        var distanceFromAI = CalcDistance(defender, attacker);
+        var attackRange = attacker.Character.AttackRange;
+        var movementRange = attacker.Character.Speed;
         return (attackRange + movementRange) > distanceFromAI;
     }
 

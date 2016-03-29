@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Assets.Scripts.Damage;
 using Assets.Scripts.Model;
 
 public class Damage : MonoBehaviour
@@ -33,7 +34,7 @@ public class Damage : MonoBehaviour
 
         if (damageAmount == 0) print("MISS!!");
 
-        Defender.TakeDamage(damageAmount);
+        Attacker.Attack(Defender, damageAmount);
 
         return true;
     }
@@ -43,12 +44,23 @@ public class Damage : MonoBehaviour
         Healer = healer;
         Reciever = FindCharacter(pointer);
         if (Reciever == null) return false;
-
+        
         DamageUtil damageUtil = new DamageUtil();
         int healAmount = damageUtil.CalculateHealAmount(Healer);
 
-        Healer.Heal(Reciever, healAmount);
-        return true;
+        return Healer.Heal(Reciever, healAmount);
+    }
+
+    public bool Flare(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateFlareDamage(Defender, Attacker);
+
+        return Attacker.Flare(Defender, damageAmount); ;
     }
     
     private Character FindCharacter(Vector2 pointer)

@@ -107,7 +107,8 @@ public class Movement : MonoBehaviour
 
     private void CreateOptimalPath()
     {
-        bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
+        FloorHighlight floorHighlight = GameObject.Find("Floor").GetComponent<FloorHighlight>();
+        bool[,] map = floorHighlight.FloorMap;
 
         Vector2 startLocation = new Vector2(transform.position.x, transform.position.z);
         Vector2 endLocation = new Vector2(_character.Position.x, _character.Position.z);

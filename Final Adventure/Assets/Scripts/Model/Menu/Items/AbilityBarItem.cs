@@ -16,10 +16,11 @@ public class AbilityBarItem : MenuBarItem
         None
     }
 
-    public AbilityBarItem(GameObject item, string name, float bottom, float top)
+    public AbilityBarItem(GameObject item, string name, Actions action, float bottom, float top)
     {
         Item = item;
         Name = name;
+        Action = action;
 
         item.transform.GetComponent<RectTransform>().offsetMin = new Vector2(0, bottom);
         item.transform.GetComponent<RectTransform>().offsetMax = new Vector2(15f, top);
@@ -44,6 +45,8 @@ public class AbilityBarItem : MenuBarItem
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
                 break;
             case Actions.Flare:
+                GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
+                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
                 break;
             case Actions.Wind:
                 break;

@@ -17,7 +17,7 @@ namespace Assets.Scripts.Movement
         
         public int Height { get; private set; }
 
-        public bool[,] FloorMap { get; private set; }
+        private bool[,] _floorMap;
 
         private string _material = Tile.Normal;
 
@@ -78,11 +78,8 @@ namespace Assets.Scripts.Movement
                 }
             }
 
-            FloorMap = new bool[Width, Height];
-            for (int y = 0; y < Height; y++)
-                for (int x = 0; x < Width; x++)
-                    FloorMap[x, y] = true;
-
+            _floorMap = new bool[Width, Height];
+            InitFloorMap();
 
             FloorArray[(int) PointerPosition.x, (int) PointerPosition.y].SetMaterial(Tile.Highlight);
         }
@@ -130,6 +127,13 @@ namespace Assets.Scripts.Movement
                     HighlLightNewPositionTile();
                 }
             }
+        }
+
+        private void InitFloorMap()
+        {
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    _floorMap[x, y] = true;
         }
 
         private void ClearPointer()
@@ -253,6 +257,18 @@ namespace Assets.Scripts.Movement
             }
 
             return modifiedPath;
+        }
+
+        public bool[,] FloorMap
+        {
+            get
+            {
+                InitFloorMap();
+                CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+                charactersController.FillMap(_floorMap);
+                return _floorMap;
+            }
+            set { _floorMap = value; }
         }
     }
 }

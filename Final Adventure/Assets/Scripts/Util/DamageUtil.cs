@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Security.Policy;
+using Assets.Scripts.Damage;
 using Assets.Scripts.Model;
+using Flare = Assets.Scripts.Damage.Flare;
 
 public class DamageUtil {
 
@@ -46,11 +48,31 @@ public class DamageUtil {
             Mod = Modifiers
         */
         float stageOne = (2f * 1f + 10f) / 200f;
-        float stageTwo = (float) healer.Magic * (float) healer.Magic;
+        float stageTwo = (float) healer.Magic * (float) Heal.Power;
         float stageThree = stageOne * stageTwo + 2f;
         float heal = stageThree * GetModifier(healer);
 
         return Mathf.RoundToInt(heal);
+    }
+
+    public int CalculateFlareDamage(Character defender, Character attacker)
+    {
+        /*
+           D = (((2 * LV + 10) / 200) * (MV / RV) * B + 2) * Mod
+           D = Damage
+           LV = Level
+           MV = Magic Value
+           RV = Resist Value
+           B = Attack Base Value
+           Mod = Modifiers
+       */
+
+        float stageOne = (2f * 1f + 10f) / 200f;
+        float stageTwo = (float)attacker.Magic / (float)defender.Resist;
+        float stageThree = stageOne * stageTwo * Flare.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+        
+        return Mathf.RoundToInt(damage);
     }
 
     private float GetModifier(Character attacker)

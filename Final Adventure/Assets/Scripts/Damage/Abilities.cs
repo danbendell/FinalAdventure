@@ -21,14 +21,34 @@ public class Abilities
     {
         CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
         CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
-        ParticleController healParticleController = GameObject.Find("Heal").GetComponent<ParticleController>();
+        ParticleController particleController = GameObject.Find("Heal").GetComponent<ParticleController>();
 
         characterHolder.Turn.CompletedAction = _damage.Heal(_caster, _pointer);
-        if (characterHolder.Turn.CompletedAction) healParticleController.Play(_pointer);
+        if (characterHolder.Turn.CompletedAction) particleController.Play(_pointer);
 
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+    }
+
+    public void Flare()
+    {
+        CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
+        ParticleController particleController = GameObject.Find("Flare").GetComponent<ParticleController>();
+
+        characterHolder.Turn.CompletedAction = _damage.Flare(_caster, _pointer);
+        if (characterHolder.Turn.CompletedAction) particleController.Play(_pointer);
+
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+    }
+
+    public void Wind()
+    {
+        ParticleController particleController = GameObject.Find("Wind").GetComponent<ParticleController>();
+        particleController.Play(_pointer);
     }
 
     public void Attack()

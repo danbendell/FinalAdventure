@@ -20,7 +20,8 @@
             Luck = 5;
             CritChance = 8;
 
-            AttackRange = 5;
+            //AttackRange = 5;
+            AttackRange = 1;
         }
 
         public Archer(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,

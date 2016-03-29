@@ -35,7 +35,7 @@ public class AbilityBar : MenuBar
             float bottom = parentHeight - ((_itemHeight * (i + 1)) + (_itemGap * i));
             float top = -(_itemHeight * i) - (_itemGap * i);
 
-            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i], bottom, top);
+            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i], (AbilityBarItem.Actions) i, bottom, top);
             Items.Add(ABI);
         }
 

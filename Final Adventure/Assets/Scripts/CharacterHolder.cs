@@ -10,6 +10,8 @@ public class CharacterHolder : MonoBehaviour
 {
 
     public Character Character;
+    public CharacterProbabilities Probabilities;
+    public float PriorityLevel;
     public Turn Turn;
     public bool IsAi;
     
@@ -40,14 +42,6 @@ public class CharacterHolder : MonoBehaviour
 	// Update is called once per frame
 	void Update () {
         KeyboardInput();
-
-
-     //   transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.Lerp(transform.GetChild(0).GetComponent<MeshRenderer>().material.GetColor("_EmissionColor"), emissionColor, Time.deltaTime * 40f));
-	    //if (transform.GetChild(0).GetComponent<MeshRenderer>().material.GetColor("_EmissionColor") ==
-	    //    new Color(0.25f, 0f, 0f))
-	    //{
-     //       emissionColor = new Color(0.0f, 0, 0);
-     //   }
     }
 
     private void KeyboardInput()
@@ -104,6 +98,17 @@ public class CharacterHolder : MonoBehaviour
                 abilities.Heal();
             }
 
+            if (magic == AbilityBarItem.Actions.Flare)
+            {
+                if (tile.GetState() != Tile.State.Attackable) return;
+                abilities.Flare();
+            }
+
+            if (magic == AbilityBarItem.Actions.Wind)
+            {
+                //if (tile.GetState() != Tile.State.Attackable) return;
+                abilities.Wind();
+            }
         }
     }
 

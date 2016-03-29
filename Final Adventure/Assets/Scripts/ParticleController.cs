@@ -7,8 +7,7 @@ using UnityEngine.Assertions.Comparers;
 
 public class ParticleController : MonoBehaviour
 {
-    public float PlayBackSpeed = 1.0f;
-    private ParticleSystem _particle;
+    private GameObject _parent;
     private Light _light;
     private List<ParticleSystem> _particalList;
 
@@ -17,11 +16,12 @@ public class ParticleController : MonoBehaviour
 	// Use this for initialization
 	void Start () {
         _particalList = new List<ParticleSystem>();
+	    _parent = transform.gameObject;
 
         for (var i = 0; i < transform.childCount; i++)
 	    {
 	        GameObject GO = transform.GetChild(i).gameObject;
-            if (GO.name == "Particle System") _particle = GO.GetComponent<ParticleSystem>();
+            if (GO.name == "Particle System") _particalList.Add(GO.GetComponent<ParticleSystem>());
             else if (GO.name == "Point light") _light = GO.GetComponent<Light>();
             else if (GO.name == "Streams") FillParticleList(transform.GetChild(i));
 	    }
@@ -42,7 +42,7 @@ public class ParticleController : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-        if (_particle.time >= _particle.duration)
+        if (_particalList[0].time >= _particalList[0].duration)
         {
             _lightIntencity = 0f;
         }
@@ -55,13 +55,9 @@ public class ParticleController : MonoBehaviour
     {
 
         MoveParticleEffect(position);
-
-        _particle.playbackSpeed = PlayBackSpeed;
-        _particle.Play();
         
         foreach (var particle in _particalList)
         {
-            particle.playbackSpeed = PlayBackSpeed;
             particle.Play();
         }
 
@@ -71,7 +67,7 @@ public class ParticleController : MonoBehaviour
     private void MoveParticleEffect(Vector2 position)
     {
         Character character = FindCharacter(position);
-        GameObject.Find("Heal").transform.position = new Vector3(character.Position.x, character.Height(), character.Position.z);
+        _parent.transform.position = new Vector3(character.Position.x, character.Height(), character.Position.z);
     }
 
     private Character FindCharacter(Vector2 pointer)
