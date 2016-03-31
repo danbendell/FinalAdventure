@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class DamageText : MonoBehaviour
 {
-    private Color _red = new Color(0.1f, 0.02f, 0.02f, 1f);
+    private Color _red = new Color(0.56f, 0.1f, 0.12f, 0.75f);
     private Color _green = new Color(0.15f, 1f, 0.1f, 0.75f);
     public GameObject GameObject;
     private Text _text;
