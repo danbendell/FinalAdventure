@@ -13,9 +13,12 @@ public class Damage : MonoBehaviour
     private Character Healer { get; set; }
     private Character Reciever { get; set; }
 
+    private DamageText DamageText;
+
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+	{
+	    DamageText = GameObject.Find("DamageTextHolder").GetComponent<DamageText>();
 	}
 	
 	// Update is called once per frame
@@ -32,7 +35,8 @@ public class Damage : MonoBehaviour
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculatePhysicalDamage(Defender, Attacker);
 
-        if (damageAmount == 0) print("MISS!!");
+        if (damageAmount == 0) DamageText.AnimateMessage("Miss");
+        DamageText.AnimateDamage(damageAmount);
 
         Attacker.Attack(Defender, damageAmount);
 
@@ -47,6 +51,7 @@ public class Damage : MonoBehaviour
         
         DamageUtil damageUtil = new DamageUtil();
         int healAmount = damageUtil.CalculateHealAmount(Healer);
+        DamageText.AnimateHeal(healAmount);
 
         return Healer.Heal(Reciever, healAmount);
     }
@@ -59,6 +64,7 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateFlareDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
 
         return Attacker.Flare(Defender, damageAmount); ;
     }

@@ -27,6 +27,11 @@ public class AI : MonoBehaviour
         StartCoroutine(AttackCharacter());
     }
 
+    private void Heal()
+    {
+        StartCoroutine(HealCharacter());
+    }
+
     private void Move()
     {
         StartCoroutine(MoveCharacter());
@@ -36,6 +41,8 @@ public class AI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        if (transform.GetComponent<CharacterHolder>() != cc.CurrentCharacterHolder) return;
         if (transform.GetComponent<Movement>().State == Movement.States.AtDestination && _attacking == false)
         {
             if (transform.GetComponent<CharacterHolder>().Turn.CompletedAction) return;
@@ -49,15 +56,11 @@ public class AI : MonoBehaviour
         AnalyseOpposition();
         FindTarget();
 
-       
         _targetPosition = _targetCharacter.XyPosition();
         _position = _character.XyPosition();
-
-        float differenceInX = CalculatePositiveDifference(_position.x, _targetPosition.x);
-        float differnceInY = CalculatePositiveDifference(_position.y, _targetPosition.y);
-        float totalDifference = differenceInX + differnceInY;
+        
         //1 is attack range
-        if (totalDifference > 1f)
+        if (DistanceBetweenCharacters() > 1f)
         {
             StartCoroutine(WalkTowardsPlayer());
         }
@@ -65,6 +68,14 @@ public class AI : MonoBehaviour
         {
             CheckAttackRange();
         }
+    }
+
+    private float DistanceBetweenCharacters()
+    {
+        float differenceInX = CalculatePositiveDifference(_position.x, _targetPosition.x);
+        float differnceInY = CalculatePositiveDifference(_position.y, _targetPosition.y);
+        float totalDifference = differenceInX + differnceInY;
+        return totalDifference;
     }
 
     private void ResetValues()
@@ -129,15 +140,25 @@ public class AI : MonoBehaviour
             if (!InAttackRange(holder, cc.CurrentCharacterHolder)) continue;
             //Check they aren't full health
             if (holder.Character.Health == holder.Character.MaxHealth) continue;
-            
+
             healableCharacters.Add(holder);
         }
 
         //No opposition in range of attack
         if (healableCharacters.Count <= 0) return;
+
         //Order them by health lost
         healableCharacters = healableCharacters.OrderByDescending(x => CalcPercentHP(x)).ToList();
-        _targetCharacter = healableCharacters[0].Character;
+
+        if (CalcPercentHP(healableCharacters[0]) < 0.25f)
+        {
+            _targetCharacter = healableCharacters[0].Character;
+        }
+
+        if (CalcPercentHP(healableCharacters[0]) < 0.5f && cc.CurrentCharacterHolder.Job == CharacterHolder.Jobs.Wizard)
+        {
+            _targetCharacter = healableCharacters[0].Character;
+        }
     }
 
     private bool InAttackRange(CharacterHolder defender, CharacterHolder attacker)
@@ -198,18 +219,31 @@ public class AI : MonoBehaviour
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterMovement();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
 
-        //This is for test purposes. Taking the position of the only other player in the game(None AI)
-
-        bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
-        map[(int)_targetPosition.x, (int)_targetPosition.y] = true;
-        SearchParameters searchParameters = new SearchParameters(_position, _targetPosition, map);
-
-        AStar pathFinder = new AStar(searchParameters);
-        flatPath = pathFinder.FindPath();
-        if(flatPath.Count > _character.Speed) flatPath = flatPath.GetRange(0, _character.Speed);
+        SetFlatPath(_character.Speed);
+        //Want to walk next to th player, not on them
         if(flatPath[flatPath.Count - 1] == _targetPosition) flatPath = flatPath.GetRange(0, flatPath.Count - 1);
-        _movementCount = 0;
+
         StartCoroutine(MovePointer(flatPath[_movementCount], Move));
+    }
+
+    private IEnumerator HighlightAttackRange()
+    {
+        yield return new WaitForSeconds(1f);
+        GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
+
+        //1 is attack range
+        int attackRange = 1;
+        SetFlatPath(attackRange);
+
+        if (flatPath.Count == 0 && _targetCharacter == _character)
+        {
+            SelfCast();
+        }
+        else
+        {
+            StartCoroutine(MovePointer(flatPath[_movementCount], Attack));
+        }
     }
 
     private IEnumerator MovePointer(Vector2 node, Action action)
@@ -219,20 +253,9 @@ public class AI : MonoBehaviour
         GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(node);
 
         _movementCount++;
+        //Repeat this function until at destination
         if (_movementCount < flatPath.Count) StartCoroutine(MovePointer(flatPath[_movementCount], action));
         else action();
-    }
-
-    private IEnumerator MoveCharacter()
-    {
-        yield return new WaitForSeconds(0.5f);
-        var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
-        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
-        Tile tile = floor[(int) pointer.x, (int) pointer.y];
-
-        transform.GetComponent<Movement>().SetPosition(tile, pointer);
-        GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Moved = true;
-        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
     }
 
     private void CheckAttackRange()
@@ -240,11 +263,8 @@ public class AI : MonoBehaviour
         _targetPosition = _targetCharacter.XyPosition();
         _position = _character.XyPosition();
 
-        float differenceInX = CalculatePositiveDifference(_position.x, _targetPosition.x);
-        float differnceInY = CalculatePositiveDifference(_position.y, _targetPosition.y);
-        float totalDifference = differenceInX + differnceInY;
         //1 is attack range
-        if (totalDifference <= 1f)
+        if (DistanceBetweenCharacters() <= 1f)
         {
             _attacking = true;
             StartCoroutine(HighlightAttackRange());
@@ -268,13 +288,8 @@ public class AI : MonoBehaviour
 
     }
 
-    private IEnumerator HighlightAttackRange()
+    private void SetFlatPath(int range)
     {
-        yield return new WaitForSeconds(1f);
-        GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
-        GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
-
-
         bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
         map[(int)_targetPosition.x, (int)_targetPosition.y] = true;
 
@@ -282,13 +297,28 @@ public class AI : MonoBehaviour
 
         AStar pathFinder = new AStar(searchParameters);
         flatPath = pathFinder.FindPath();
-        //1 is attack range
-        if (flatPath.Count > 1)
-        {
-            flatPath = flatPath.GetRange(0, 1);
-        }
+        if (flatPath.Count > range) flatPath = flatPath.GetRange(0, range);
         _movementCount = 0;
-        StartCoroutine(MovePointer(flatPath[_movementCount], Attack));
+    } 
+
+    private void SelfCast()
+    {
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(_position);
+        Heal();
+    }
+
+    private IEnumerator MoveCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+        var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Tile tile = floor[(int)pointer.x, (int)pointer.y];
+
+        transform.GetComponent<Movement>().SetPosition(tile, pointer);
+        GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Moved = true;
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+
+        //This is waiting for the character to move into position, continues in the update function
     }
 
     private IEnumerator AttackCharacter()
@@ -298,6 +328,33 @@ public class AI : MonoBehaviour
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Abilities abilities = new Abilities(_character, pointer);
         abilities.Attack();
+
+        CheckNextAction();
+    }
+
+    private IEnumerator HealCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Heal();
+
+        CheckNextAction();
+    }
+
+    private void CheckNextAction()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder ch = cc.CurrentCharacterHolder;
+        if (!ch.Turn.Moved) CheckMovement();
+    }
+
+    private void CheckMovement()
+    {
+        //Need to check in here to see if the AI wants to move away from its current position.
+        //For now it is going to end its go
+        Wait();
     }
 
     private void Wait()

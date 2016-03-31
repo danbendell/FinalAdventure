@@ -11,7 +11,7 @@ namespace Assets.Scripts.Model
             MaxMana = 50;
             Mana = 50;
 
-            Strength = 4;
+            Strength = 14;
             Defence = 5;
             Magic = 15;
             Resist = 12;
