@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -14,15 +15,16 @@ public class ActionBarItem : MenuBarItem
         Attack,
         Move,
         Magic,
+        Ability,
         Wait,
         None
     }
 
-    public ActionBarItem(GameObject item, Actions action, float bottom, float top)
+    public ActionBarItem(GameObject item, string name, float bottom, float top)
     {
         Item = item;
-        Name = action.ToString();
-        Action = action;
+        Name = name;
+        Action = (Actions)Enum.Parse(typeof(Actions), name);
         Active = false;
 
         item.transform.GetComponent<RectTransform>().offsetMin = new Vector2(0, bottom);
@@ -80,7 +82,12 @@ public class ActionBarItem : MenuBarItem
                 break;
             case Actions.Magic:
                 GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Hidden;
-                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().Action = AbilityBarItem.Actions.None;
+                GameObject.Find("MagicBar").GetComponent<MagicBar>().Spell = MagicBarItem.Spells.None;
+                GameObject.Find("MagicBar").GetComponent<MagicBar>().State = MenuBar.States.Enabled;
+                break;
+            case Actions.Ability:
+                GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Hidden;
+                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().Ability = AbilityBarItem.Abilities.None;
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Enabled;
                 break;
             case Actions.Wait:

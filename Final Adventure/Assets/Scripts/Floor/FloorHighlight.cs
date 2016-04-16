@@ -21,24 +21,26 @@ namespace Assets.Scripts.Movement
 
         private string _material = Tile.Normal;
 
-        private int _tileAllowance = 0;
+        private Vector2 _tileAllowance = new Vector2(0, 0);
 
         public void SetMovement(Vector2 position, int speed)
         {
             _position = position;
             PointerPosition = position;
 
+            FillFloor();
             _material = Tile.Walkpath;
 
-            _tileAllowance = speed;
+            _tileAllowance = new Vector2(0, speed);
             HighlLightNewPositionTile();
         }
 
-        public void SetAttackRange(Vector2 position, int range)
+        public void SetAttackRange(Vector2 position, Vector2 range)
         {
             _position = position;
             PointerPosition = position;
-
+            
+            InitFloorMap();
             _material = Tile.Attack;
 
             _tileAllowance = range;
@@ -111,7 +113,7 @@ namespace Assets.Scripts.Movement
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
-                if (PointerPosition.x < 5)
+                if (PointerPosition.x < Width - 1)
                 {
                     ClearPointer();
                     PointerPosition.x++;
@@ -120,7 +122,7 @@ namespace Assets.Scripts.Movement
             }
             else if (Input.GetKeyDown(KeyCode.W))
             {
-                if (PointerPosition.y < 3)
+                if (PointerPosition.y < Height - 1)
                 {
                     ClearPointer();
                     PointerPosition.y++;
@@ -174,13 +176,13 @@ namespace Assets.Scripts.Movement
             ClearFloor();
 
             Vector2 startPosition;
-            startPosition.y = _position.y - _tileAllowance;
+            startPosition.y = _position.y - _tileAllowance.y;
             startPosition.x = _position.x;
 
             if (startPosition.y < 0)
             {
                 startPosition.y = 0;
-                startPosition.x = _position.x - _tileAllowance;
+                startPosition.x = _position.x - _tileAllowance.y;
                 if (startPosition.x < 0) startPosition.x = 0;
             }
 
@@ -195,7 +197,8 @@ namespace Assets.Scripts.Movement
                     float totalDifference = differenceInX + differnceInY;
 
                     if (totalDifference == 0 && _material == Tile.Walkpath) continue;
-                    if (totalDifference <= _tileAllowance)
+                    if (_floorMap[x, y] == false) continue;
+                    if (totalDifference >= _tileAllowance.x && totalDifference <= _tileAllowance.y)
                     {
                         HighlightMovementTile(currentX, currentY);
                     }
@@ -225,7 +228,7 @@ namespace Assets.Scripts.Movement
         {
             _material = Tile.Normal;
             ClearFloor();
-            _tileAllowance = 0;
+            _tileAllowance = new Vector2(0,0);
             ShowPointer();
         }
 
@@ -263,12 +266,17 @@ namespace Assets.Scripts.Movement
         {
             get
             {
-                InitFloorMap();
-                CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
-                charactersController.FillMap(_floorMap);
+                FillFloor();
                 return _floorMap;
             }
             set { _floorMap = value; }
+        }
+
+        public void FillFloor()
+        {
+            InitFloorMap();
+            CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+            charactersController.FillMap(_floorMap);
         }
     }
 }

@@ -1,58 +1,37 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class AbilityBarItem : MenuBarItem
+public class AbilityBarItem : SubMenuBarItem
 {
-    public Actions Action;
+    public Abilities Ability;
 
-    public enum Actions
+    public enum Abilities
     {
-        Heal,
-        Flare,
-        Wind,
-        Aqua,
-        Earth,
+        Focus,
         None
     }
 
-    public AbilityBarItem(GameObject item, string name, Actions action, float bottom, float top)
+    public AbilityBarItem(GameObject item, string name, float bottom, float top)
     {
-        Item = item;
-        Name = name;
-        Action = action;
-
-        item.transform.GetComponent<RectTransform>().offsetMin = new Vector2(0, bottom);
-        item.transform.GetComponent<RectTransform>().offsetMax = new Vector2(15f, top);
-        item.transform.GetComponent<RectTransform>().localScale = Scale;
-        item.transform.GetComponent<RectTransform>().anchorMin = AnchorMin;
-        item.transform.GetComponent<RectTransform>().anchorMax = AnchorMax;
-        item.transform.GetChild(0).GetComponent<Text>().text = Name;
+        base.Create(item, name, bottom, top);
+        Ability = (Abilities) Enum.Parse(typeof(Abilities), name);
     }
 
     public override void Selected()
     {
         base.Selected();
 
-        Item.transform.parent.GetComponent<AbilityBar>().Action = Action;
+        Item.transform.parent.GetComponent<AbilityBar>().Ability = Ability;
         if (Disabled()) return;
         if (GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State != MenuBar.States.Enabled) return;
 
-        switch (Action)
+        switch (Ability)
         {
-            case Actions.Heal:
+            case Abilities.Focus:
                 GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
-                break;
-            case Actions.Flare:
-                GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
-                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
-                break;
-            case Actions.Wind:
-                break;
-            case Actions.Aqua:
-                break;
-            case Actions.Earth:
                 break;
         }
     }

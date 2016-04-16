@@ -2,8 +2,10 @@
 using System.Collections;
 using Assets.Scripts.Movement;
 
-public class Rotation : MonoBehaviour {
+public class Rotation : MonoBehaviour
+{
 
+    public bool Active = true;
 
     private Vector3 _left = new Vector3(0f, 0f, -1f);
     private Vector3 _right = new Vector3(0f, 0f, 1f);
@@ -20,10 +22,15 @@ public class Rotation : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
         CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
         _characterHolder = CC.CurrentCharacterHolder;
-	    _pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+
+        Active = !(_characterHolder.Turn.Moved && _characterHolder.Turn.CompletedAction);
+        if (!Active) return;
+
+        _pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
 
         float differenceInX = CalculatePositiveDifference(_characterHolder.Character.XyPosition().x, _pointer.x);
         float differnceInY = CalculatePositiveDifference(_characterHolder.Character.XyPosition().y, _pointer.y);

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Damage;
 using Assets.Scripts.Model;
+using Flare = Assets.Scripts.Damage.Flare;
 
 public class Damage : MonoBehaviour
 {
@@ -43,6 +44,20 @@ public class Damage : MonoBehaviour
         return true;
     }
 
+    public bool Focus(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateFocusDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
+
+        Focus focus = new Focus();
+        return focus.Cast(Attacker, Defender, damageAmount);
+    }
+
     public bool Heal(Character healer, Vector2 pointer)
     {
         Healer = healer;
@@ -53,7 +68,8 @@ public class Damage : MonoBehaviour
         int healAmount = damageUtil.CalculateHealAmount(Healer);
         DamageText.AnimateHeal(healAmount);
 
-        return Healer.Heal(Reciever, healAmount);
+        Heal heal = new Heal();
+        return heal.Cast(Healer, Reciever, healAmount);
     }
 
     public bool Flare(Character attacker, Vector2 pointer)
@@ -66,7 +82,8 @@ public class Damage : MonoBehaviour
         int damageAmount = damageUtil.CalculateFlareDamage(Defender, Attacker);
         DamageText.AnimateDamage(damageAmount);
 
-        return Attacker.Flare(Defender, damageAmount); ;
+        Flare flare = new Flare();
+        return flare.Cast(Attacker, Defender, damageAmount);
     }
     
     private Character FindCharacter(Vector2 pointer)

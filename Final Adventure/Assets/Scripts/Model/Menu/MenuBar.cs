@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine.UI;
 
 public abstract class MenuBar : MonoBehaviour {
@@ -65,6 +66,16 @@ public abstract class MenuBar : MonoBehaviour {
 
         AnimateMenuBar();
 
+    }
+
+    public void Refresh()
+    {
+        ScrollPosition = 1;
+        ScrollPercent = 1;
+
+        _selectedPosition = 1;
+        _upperBound = 1;
+        _lowerBound = 4;
     }
 
     private void Scroll()

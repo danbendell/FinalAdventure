@@ -1,4 +1,8 @@
-﻿namespace Assets.Scripts.Model
+﻿using System.Collections.Generic;
+using Assets.Scripts.Damage;
+using UnityEngine;
+
+namespace Assets.Scripts.Model
 {
     public class Archer : Character {
 
@@ -20,12 +24,18 @@
             Luck = 5;
             CritChance = 8;
 
-            //AttackRange = 5;
-            AttackRange = 1;
+            AttackRange = new Vector2(2, 5);
+
+            Spells = new List<Spell>();
+            Spells.Add(new Heal());
+
+            Abilities = new List<Ability>();
+            Abilities.Add(new Focus());
+
         }
 
         public Archer(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
-            int evasion, int luck, int critChance, int attackRange)
+            int evasion, int luck, int critChance, Vector2 attackRange, List<Ability> abilities, List<Spell> spells)
         {
             Health = health;
             Mana = mana;
@@ -40,12 +50,18 @@
             Evasion = evasion;
             Luck = luck;
             CritChance = critChance;
+
             AttackRange = attackRange;
+
+            Abilities = abilities;
+            Spells = spells;
+
         }
 
-        public new void WhoAmI()
+        public override CharacterHolder.Jobs Job()
         {
-            //print("I am an Archer");
+            return CharacterHolder.Jobs.Archer;
         }
+
     }
 }

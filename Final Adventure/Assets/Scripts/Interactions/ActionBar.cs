@@ -10,7 +10,7 @@ public class ActionBar : MenuBar
 
     public ActionBarItem.Actions Action = ActionBarItem.Actions.None;
 
-    private List<string> _abilities = new List<string> { "Attack", "Move", "Magic", "Wait" };
+    private List<string> _actions = new List<string> { "Attack", "Move", "Magic", "Ability", "Wait" };
     private float _itemHeight = 45.5f;
     private float _itemGap = 2f;
 
@@ -23,27 +23,9 @@ public class ActionBar : MenuBar
 
         AdjustListHeight();
 
-        float parentHeight = transform.GetComponent<RectTransform>().sizeDelta.y;
+        Create();
 
-        for (var i = 0; i < _abilities.Count; i++)
-        {
-            GameObject abilityBarItem = (GameObject)Instantiate(Resources.Load("UIBarItem"));
-            abilityBarItem.transform.SetParent(transform);
-            abilityBarItem.name = _abilities[i];
-
-            float bottom = parentHeight - ((_itemHeight * (i + 1)) + (_itemGap * i));
-            float top = -(_itemHeight * i) - (_itemGap * i);
-
-            ActionBarItem ABI = new ActionBarItem(abilityBarItem, (ActionBarItem.Actions) i, bottom, top);
-            Items.Add(ABI);
-        }
-
-        if (Items.Count > 0) Items[0].Active = true;
-
-        var overFlowItems = _abilities.Count - 4;
-        if(overFlowItems > 0) ScrollPercent = 1 / (float) overFlowItems;
-
-        ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
+       
     }
 	
 	// Update is called once per frame
@@ -63,10 +45,59 @@ public class ActionBar : MenuBar
         }
     }
 
+    private void Create()
+    {
+        CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder CH = CC.CurrentCharacterHolder;
+
+        float parentHeight = transform.GetComponent<RectTransform>().sizeDelta.y;
+
+        for (var i = 0; i < _actions.Count; i++)
+        {
+            GameObject abilityBarItem = (GameObject)Instantiate(Resources.Load("UIBarItem"));
+            abilityBarItem.transform.SetParent(transform);
+            abilityBarItem.name = _actions[i];
+
+            float bottom = parentHeight - ((_itemHeight * (i + 1)) + (_itemGap * i));
+            float top = -(_itemHeight * i) - (_itemGap * i);
+
+            ActionBarItem ABI = new ActionBarItem(abilityBarItem, _actions[i], bottom, top);
+            Items.Add(ABI);
+        }
+
+        if (Items.Count > 0) Items[0].Active = true;
+
+        ScrollPercent = 1 / (float)(_actions.Count - 4);
+
+        var overFlowItems = _actions.Count - 4;
+        if (overFlowItems > 0) ScrollPercent = 1/(float) overFlowItems;
+        else ScrollPercent = 0;
+
+        ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
+    }
+
+    public void Refresh(List<string> actions)
+    {
+        base.Refresh();
+        ClearMenuBar();
+        _actions = actions;
+        Create();
+    }
+
+    public void ClearMenuBar()
+    {
+        Items.RemoveRange(0, Items.Count);
+        for (var i = 0; i < transform.childCount; i++)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
+    }
+
     public override void Show()
     {
         base.Show();
         GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = States.Hidden;
+        GameObject.Find("MagicBar").GetComponent<MagicBar>().State = States.Hidden;
     }
 
     public void DisableAction()
@@ -81,6 +112,7 @@ public class ActionBar : MenuBar
     {
         if (State != States.Enabled) return;
         if(State == States.Enabled) GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = States.Hidden;
+        if (State == States.Enabled) GameObject.Find("MagicBar").GetComponent<MagicBar>().State = States.Hidden;
 
         foreach (MenuBarItem item in Items)
         {
@@ -107,7 +139,7 @@ public class ActionBar : MenuBar
 
     private void AdjustListHeight()
     {
-        float combinedItemHeight = _abilities.Count * (_itemHeight + _itemGap);
+        float combinedItemHeight = _actions.Count * (_itemHeight + _itemGap);
 
         if (combinedItemHeight < transform.GetComponent<RectTransform>().sizeDelta.y) return;
 

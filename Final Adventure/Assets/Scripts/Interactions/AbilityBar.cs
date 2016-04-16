@@ -2,66 +2,77 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Assets.Scripts.Damage;
 using UnityEngine.UI;
+using Flare = Assets.Scripts.Damage.Flare;
 
-public class AbilityBar : MenuBar
+public class AbilityBar : SubMenuBar
 {
 
-    public AbilityBarItem.Actions Action = AbilityBarItem.Actions.None;
-
-    private List<string> _abilities = new List<string> { "Heal", "Flare", "Wind", "Aqua", "Earth" };
-    private float _itemHeight = 45.5f;
-    private float _itemGap = 2f;
-
-
+    public AbilityBarItem.Abilities Ability = AbilityBarItem.Abilities.None;
+    private List<Ability> _abilities = new List<Ability>();
+    
     // Use this for initialization
     void Start ()
     {
+        Init(_abilities);
 
-        Init();
-
-        State = States.Hidden;
-
-	    AdjustListHeight();
-
-        float parentHeight = transform.GetComponent<RectTransform>().sizeDelta.y;
-
-	    for (var i = 0; i < _abilities.Count; i++)
-	    {
-            GameObject abilityBarItem = (GameObject)Instantiate(Resources.Load("UIBarItem"));
-            abilityBarItem.transform.SetParent(transform);
-            abilityBarItem.name = _abilities[i];
-
-            float bottom = parentHeight - ((_itemHeight * (i + 1)) + (_itemGap * i));
-            float top = -(_itemHeight * i) - (_itemGap * i);
-
-            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i], (AbilityBarItem.Actions) i, bottom, top);
-            Items.Add(ABI);
-        }
+        Create();
 
         if (Items.Count > 0) Items[0].Active = true;
 
-        ScrollPercent = 1 / (float) (_abilities.Count - 4);
+        ScrollPercent = 1 / (ItemCount - 4);
 
         ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
-
     }
 	
 	// Update is called once per frame
 	void Update () {
 
-        UpdateMenu();
+        UpdateSubMenu();
 
 	    KeyboardInput();
-       
-        
+
+	}
+
+    private void Create()
+    {
+        CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder CH = CC.CurrentCharacterHolder;
+
+        float parentHeight = transform.GetComponent<RectTransform>().sizeDelta.y;
+
+        for (var i = 0; i < _abilities.Count; i++)
+        {
+            GameObject abilityBarItem = (GameObject) Instantiate(Resources.Load("UIBarItem"));
+            abilityBarItem.transform.SetParent(transform);
+            abilityBarItem.name = _abilities[i].Name;
+
+            float bottom = parentHeight - ((ItemHeight * (i + 1)) + (ItemGap * i));
+            float top = -(ItemHeight * i) - (ItemGap * i);
+
+            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i].Name, bottom, top);
+            Items.Add(ABI);
+        }
+
+        if (Items.Count > 0) Items[0].Active = true;
+
+        ScrollPercent = 1 / (float)(_abilities.Count - 4);
+    }
+
+    public void Refresh(List<Ability> abilities)
+    {
+        base.Refresh();
+        ClearMenuBar();
+        _abilities = abilities;
+        Create();
     }
 
     public void DisableAction()
     {
         foreach (AbilityBarItem item in Items)
         {
-            if (item.Action == Action) item.DisableItem();
+            if (item.Ability == Ability) item.DisableItem();
         }
     }
 
@@ -73,29 +84,17 @@ public class AbilityBar : MenuBar
             if (State == States.Disabled)
             {
                 State = States.Enabled;
-                Action = AbilityBarItem.Actions.None;
+                Ability = AbilityBarItem.Abilities.None;
                 if (State == States.Disabled) State = States.Enabled;
             }
             else if (State == States.Enabled)
             {
                 State = States.Hidden;
-                Action = AbilityBarItem.Actions.None;
+                Ability = AbilityBarItem.Abilities.None;
                 GameObject.Find("ActionBar").GetComponent<MenuBar>().State = MenuBar.States.Enabled;
             }
 
         }
 
     }
-
-
-    private void AdjustListHeight()
-    {
-        float combinedItemHeight = _abilities.Count*(_itemHeight + _itemGap);
-
-        if (combinedItemHeight < transform.GetComponent<RectTransform>().sizeDelta.y) return;
-
-        transform.GetComponent<RectTransform>().sizeDelta = new Vector2(transform.GetComponent<RectTransform>().sizeDelta.x, combinedItemHeight);
-    }
-
-
 }

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Damage;
+﻿using System.Collections.Generic;
+using Assets.Scripts.Damage;
 using UnityEngine;
 
 namespace Assets.Scripts.Model
@@ -35,11 +36,15 @@ namespace Assets.Scripts.Model
 
         public Vector3 Position { get; set; }
 
-        public int AttackRange { get; set; }
+        public Vector2 AttackRange { get; set; }
 
-        public virtual void WhoAmI()
+        public List<Spell> Spells { get; protected set; }
+
+        public List<Ability> Abilities { get; protected set; }
+
+        public virtual CharacterHolder.Jobs Job()
         {
-            //print("I am a Character");
+            return CharacterHolder.Jobs.Wizard;
         }
 
         public void Attack(Character defender, int amount)
@@ -47,38 +52,6 @@ namespace Assets.Scripts.Model
             if(defender.Health > 0)
                 defender.Health -= amount;
             if (defender.Health < 0) defender.Health = 0;
-        }
-
-        public bool Heal(Character reciever, int amount)
-        {
-            
-            if (Mana - Damage.Heal.Cost < 0) return false;
-            if (reciever.Health == reciever.MaxHealth) return false;
-
-            if (reciever.Health < reciever.MaxHealth)
-            {
-                Mana -= (int) Damage.Heal.Cost;
-                reciever.Health += amount;
-            }  
-
-            if (reciever.Health > reciever.MaxHealth) reciever.Health = reciever.MaxHealth;
-
-            return true;
-        }
-
-        public bool Flare(Character defender, int damage)
-        {
-            if (Mana - Damage.Flare.Cost < 0) return false;
-
-            if (defender.Health > 0)
-            {
-                Mana -= (int )Damage.Flare.Cost;
-                defender.Health -= damage;
-            }
-
-            if (defender.Health < 0) defender.Health = 0;
-
-            return true;
         }
 
         public Vector2 XyPosition()

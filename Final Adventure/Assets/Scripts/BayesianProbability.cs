@@ -75,7 +75,7 @@ public class BayesianProbability
         float attackProbability = 0f;
 
         var distanceFromAI = CalcDistance(characterHolder, _AI);
-        var attackRange = characterHolder.Character.AttackRange;
+        var attackRange = characterHolder.Character.AttackRange.y;
         var movementRange = characterHolder.Character.Speed;
         if ((attackRange + movementRange) > distanceFromAI)
         {
@@ -227,7 +227,7 @@ public class BayesianProbability
     private bool InAttackRange(CharacterHolder defender, CharacterHolder attacker)
     {
         var distanceFromAI = CalcDistance(defender, attacker);
-        var attackRange = attacker.Character.AttackRange;
+        var attackRange = attacker.Character.AttackRange.y;
         var movementRange = attacker.Character.Speed;
         return (attackRange + movementRange) > distanceFromAI;
     }
@@ -271,7 +271,7 @@ public class BayesianProbability
         foreach (var ai in _aiCharacterHolders)
         {
             var distanceFromAI = CalcDistance(characterHolder, ai);
-            var attackRange = ai.Character.AttackRange;
+            var attackRange = ai.Character.AttackRange.y;
             var movementRange = ai.Character.Speed;
             if ((attackRange + movementRange) > distanceFromAI)
             {
@@ -288,7 +288,7 @@ public class BayesianProbability
         foreach (var allies in _opposition)
         {
             var distanceFromAI = CalcDistance(characterHolder, allies);
-            var attackRange = allies.Character.AttackRange;
+            var attackRange = allies.Character.AttackRange.y;
             var movementRange = allies.Character.Speed;
             if ((attackRange + movementRange) > distanceFromAI)
             {

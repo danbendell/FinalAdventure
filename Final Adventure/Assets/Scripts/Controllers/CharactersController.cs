@@ -19,6 +19,7 @@ public class CharactersController : MonoBehaviour
         {
             _currentCharacterHolder = value;
             _currentCharacterHolder.Turn = new Turn();
+            GameObject.Find("Menus").GetComponent<MenuController>().Refresh(_currentCharacterHolder);
             GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
             if(_currentCharacterHolder.IsAi) transform.GetChild(_turnNumber).GetComponent<AI>().BeginTurn();
         }
@@ -50,7 +51,14 @@ public class CharactersController : MonoBehaviour
     private void CheckTurnStatus()
     {
         if (!CurrentCharacterHolder.Turn.Complete()) return;
+        //RotateCharacter();
         NextPlayer();
+    }
+
+    private void RotateCharacter()
+    {
+        RotationNodes rotationNodes = GameObject.Find("Rotation").GetComponent<RotationNodes>();
+        rotationNodes.Active = true;
     }
 
     private void NextPlayer()
@@ -71,12 +79,13 @@ public class CharactersController : MonoBehaviour
             Vector2 characterPos = CharacterHolders[i].Character.XyPosition();
             if (GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition == characterPos)
             {
-                _uiCharacterStats.UpdateCharacterStats(CharacterHolders[i].Character);
+                bool isSelf = (CurrentCharacterHolder == CharacterHolders[i]);
+                _uiCharacterStats.UpdateCharacterStats(CharacterHolders[i], isSelf);
                 GameObject.Find("Stats").GetComponent<StatsBar>().Show();
                 break;
             }
 
-            _uiCharacterStats.UpdateCharacterStats(CurrentCharacterHolder.Character);
+            _uiCharacterStats.UpdateCharacterStats(CurrentCharacterHolder, true);
             GameObject.Find("Stats").GetComponent<StatsBar>().Hide();
         }
     }

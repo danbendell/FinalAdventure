@@ -51,6 +51,18 @@ public class Abilities
         particleController.Play(_pointer);
     }
 
+    public void Focus()
+    {
+        CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
+
+        characterHolder.Turn.CompletedAction = _damage.Focus(_caster, _pointer);
+
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+    }
+
     public void Attack()
     {
         CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();

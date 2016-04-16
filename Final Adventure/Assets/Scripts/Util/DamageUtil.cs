@@ -33,7 +33,32 @@ public class DamageUtil {
         float stageThree = stageOne * stageTwo * attacker.Strength + 2f;
         float damage = stageThree * GetModifier(attacker);
 
-        damage *= CalculateHitChance(defender, attacker);
+        float hitChanceBase = GetAttackType(attacker); 
+        damage *= CalculateHitChance(defender, attacker, hitChanceBase);
+
+        return Mathf.RoundToInt(damage);
+    }
+
+    public int CalculateFocusDamage(Character defender, Character attacker)
+    {
+        /*
+            D = (((2 * LV + 10) / 250) * (SV / DV) * B + 2) * Mod
+            D = Damage
+            LV = Level
+            SV = Strength Value
+            DV = Defenece Value
+            B = Focus Base Value
+            Mod = Modifiers
+        */
+        Focus focus = new Focus();
+        float stageOne = (2f * 1f + 10f) / 250f;
+        float stageTwo = (float)attacker.Strength / (float)defender.Defence;
+        float stageThree = stageOne * stageTwo * focus.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+
+        float hitChanceBase = GetAttackType(attacker);
+        hitChanceBase *= focus.AccuracyMod;
+        damage *= CalculateHitChance(defender, attacker, hitChanceBase);
 
         return Mathf.RoundToInt(damage);
     }
@@ -47,12 +72,13 @@ public class DamageUtil {
             MV = Magic Value
             Mod = Modifiers
         */
+        Heal heal = new Heal();
         float stageOne = (2f * 1f + 10f) / 200f;
-        float stageTwo = (float) healer.Magic * (float) Heal.Power;
+        float stageTwo = (float) healer.Magic * (float) heal.Power;
         float stageThree = stageOne * stageTwo + 2f;
-        float heal = stageThree * GetModifier(healer);
+        float healAmount = stageThree * GetModifier(healer);
 
-        return Mathf.RoundToInt(heal);
+        return Mathf.RoundToInt(healAmount);
     }
 
     public int CalculateFlareDamage(Character defender, Character attacker)
@@ -66,10 +92,10 @@ public class DamageUtil {
            B = Attack Base Value
            Mod = Modifiers
        */
-
+        Flare flare = new Flare();
         float stageOne = (2f * 1f + 10f) / 200f;
         float stageTwo = (float)attacker.Magic / (float)defender.Resist;
-        float stageThree = stageOne * stageTwo * Flare.Power + 2f;
+        float stageThree = stageOne * stageTwo * flare.Power + 2f;
         float damage = stageThree * GetModifier(attacker);
         
         return Mathf.RoundToInt(damage);
@@ -107,7 +133,7 @@ public class DamageUtil {
         return Random.Range(min, max);
     }
 
-    private int CalculateHitChance(Character defender, Character attacker)
+    private int CalculateHitChance(Character defender, Character attacker, float hitChanceBase)
     {
         /*
             Based on the attack type and its accuracy vs evasion.
@@ -122,7 +148,7 @@ public class DamageUtil {
             Magic 100% HR = 1
         */
         //This is assuming the attack is Melee 0.95f
-        var hitChance = 0.95f * ((float) attacker.Accuracy / (float) defender.Evasion);
+        var hitChance = hitChanceBase * ((float) attacker.Accuracy / (float) defender.Evasion);
 
         //Hit has over 100% chance to hit
         if (hitChance > 1) return 1;
@@ -132,5 +158,16 @@ public class DamageUtil {
         if (Random.Range(1, 100) > (hitChance*100)) return 0;
 
         return 1;
+    }
+
+    private float GetAttackType(Character attacker)
+    {
+        /*
+            HC e.g. Melee 95% = 0.95
+            Range 85% HR  = 0.85 - Varies on distance, abilities used
+            Magic 100% HR = 1
+        */
+        if (attacker.Job() == CharacterHolder.Jobs.Archer) return 0.85f;
+        return 0.95f;
     }
 }

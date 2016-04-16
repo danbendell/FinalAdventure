@@ -18,7 +18,28 @@ public class AI : MonoBehaviour
     private Character _targetCharacter;
     private Vector2 _targetPosition;
 
+    private int _minimumThreatValue;
+
     private bool _attacking = false;
+
+   
+    public class MapTile
+    {
+        public Vector2 Position { get; set; }
+        public int ThreatLevel { get; set; }
+        public int DistanceLevel { get; set; }
+        public bool IsAvaliable { get; set; }
+
+        public MapTile()
+        {
+            Position = new Vector2(0,0);
+            ThreatLevel = 0;
+            DistanceLevel = 0;
+            IsAvaliable = true;
+        }
+    }
+
+    private MapTile[,] _map;
 
     private delegate void Action();
 
@@ -60,9 +81,13 @@ public class AI : MonoBehaviour
         _position = _character.XyPosition();
         
         //1 is attack range
-        if (DistanceBetweenCharacters() > 1f)
+        if (DistanceBetweenCharacters() > _character.AttackRange.y)
         {
             StartCoroutine(WalkTowardsPlayer());
+        }
+        else if (DistanceBetweenCharacters() < _character.AttackRange.x)
+        {
+            StartCoroutine(WalkAwayFromPlayer());
         }
         else
         {
@@ -74,6 +99,14 @@ public class AI : MonoBehaviour
     {
         float differenceInX = CalculatePositiveDifference(_position.x, _targetPosition.x);
         float differnceInY = CalculatePositiveDifference(_position.y, _targetPosition.y);
+        float totalDifference = differenceInX + differnceInY;
+        return totalDifference;
+    }
+
+    private float DistanceBetweenPoints(Vector2 start, Vector2 end)
+    {
+        float differenceInX = CalculatePositiveDifference(start.x, end.x);
+        float differnceInY = CalculatePositiveDifference(start.y, end.y);
         float totalDifference = differenceInX + differnceInY;
         return totalDifference;
     }
@@ -108,23 +141,42 @@ public class AI : MonoBehaviour
 
     private void FindOpposition()
     {
-        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
-        var holders = cc.CharacterHolders;
-        _character = cc.CurrentCharacterHolder.Character;
-        var targetableCharacters = new List<CharacterHolder>();
-        foreach (var holder in holders)
-        {
-            if (holder.IsAi) continue;
-            if (!InAttackRange(holder, cc.CurrentCharacterHolder)) continue;
-            targetableCharacters.Add(holder);
-        }
-
-        //No opposition in range of attack
-        if (targetableCharacters.Count <= 0) return;
+        var targetableCharacters = GetOppositionInAttackRange();
         
         targetableCharacters = OrderTargets(targetableCharacters);
         _targetCharacter = targetableCharacters[0].Character;
     }
+
+    private List<CharacterHolder> GetOppositionInAttackRange()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        _character = cc.CurrentCharacterHolder.Character;
+
+        var oppostion = GetOpposition();
+        var targetableCharacters = new List<CharacterHolder>();
+        foreach (var character in oppostion)
+        {
+            if (!InAttackRange(character, cc.CurrentCharacterHolder)) continue;
+            targetableCharacters.Add(character);
+        }
+
+        return targetableCharacters;
+    }
+
+    private List<CharacterHolder> GetOpposition()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        var holders = cc.CharacterHolders;
+
+        var opposition = new List<CharacterHolder>();
+        foreach (var holder in holders)
+        {
+            if (holder.IsAi) continue;
+            opposition.Add(holder);
+        }
+
+        return opposition;
+    } 
 
     private void FindAlliesForHealing()
     {
@@ -164,7 +216,7 @@ public class AI : MonoBehaviour
     private bool InAttackRange(CharacterHolder defender, CharacterHolder attacker)
     {
         var distanceFromAI = CalcDistance(defender, attacker);
-        var attackRange = attacker.Character.AttackRange;
+        var attackRange = attacker.Character.AttackRange.y;
         var movementRange = attacker.Character.Speed;
         return (attackRange + movementRange) > distanceFromAI;
     }
@@ -219,11 +271,26 @@ public class AI : MonoBehaviour
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterMovement();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
 
-        SetFlatPath(_character.Speed);
+        SetFlatPath(new Vector2(0, _character.Speed));
         //Want to walk next to th player, not on them
         if(flatPath[flatPath.Count - 1] == _targetPosition) flatPath = flatPath.GetRange(0, flatPath.Count - 1);
 
         StartCoroutine(MovePointer(flatPath[_movementCount], Move));
+    }
+
+    private IEnumerator WalkAwayFromPlayer()
+    {
+        yield return new WaitForSeconds(2.0f);
+        GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterMovement();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
+
+        var tempPosition = _targetPosition;
+        _targetPosition = RunAwayFromTarget(_targetPosition);
+        SetFlatPath(new Vector2(0, _character.Speed));
+        _targetPosition = tempPosition;
+        _movementCount = 0;
+        StartCoroutine(MovePointer(flatPath[_movementCount], Move));
+
     }
 
     private IEnumerator HighlightAttackRange()
@@ -231,10 +298,8 @@ public class AI : MonoBehaviour
         yield return new WaitForSeconds(1f);
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
-
-        //1 is attack range
-        int attackRange = 1;
-        SetFlatPath(attackRange);
+        
+        SetFlatPath(_character.AttackRange);
 
         if (flatPath.Count == 0 && _targetCharacter == _character)
         {
@@ -258,13 +323,148 @@ public class AI : MonoBehaviour
         else action();
     }
 
+    private Vector2 RunAwayFromTarget(Vector2 targetPosition)
+    {
+        var newPosition = new Vector2(0,0);
+        //AR.x = 2  - DBC = 1
+        //DNTM = 1
+        var distanceNeedToMove = _character.AttackRange.x - DistanceBetweenCharacters();
+       
+        FillWithMovementPossibilities();
+
+        FillWithThreatValues();
+
+        FillWithDistanceValue();
+
+        newPosition = FindNewPosition();
+        
+        return newPosition;
+    }
+
+    private void FillWithMovementPossibilities()
+    {
+        var width = GameObject.Find("Floor").GetComponent<FloorHighlight>().Width;
+        var height = GameObject.Find("Floor").GetComponent<FloorHighlight>().Height;
+        bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
+
+        _map = new MapTile[width, height];
+        InitMapTiles();
+
+        for (var x = 0; x < width; x++)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                _map[x,y].Position = new Vector2(x,y);
+                if (map[x, y] == false)
+                {
+                    _map[x, y].IsAvaliable = false;
+                    continue;
+                }
+                var distance = DistanceBetweenPoints(_position, new Vector2(x, y));
+                if (distance > _character.Speed)
+                {
+                    map[x, y] = false;
+                    _map[x, y].IsAvaliable = false;
+                }
+            }
+        }
+    }
+
+    private void InitMapTiles()
+    {
+        for (var x = 0; x < _map.GetLength(0); x++)
+        {
+            for (var y = 0; y < _map.GetLength(1); y++)
+            {
+                _map[x,y] = new MapTile();
+            }
+        }
+    }
+
+    private void FillWithThreatValues()
+    {
+        var opposition = GetOpposition();
+        foreach (CharacterHolder holder in opposition)
+        {
+            InsertCharacterThreatValues(holder.Character.XyPosition());
+        }
+        
+    }
+
+    private void FillWithDistanceValue()
+    {
+        var opposition = GetOpposition();
+        foreach (CharacterHolder holder in opposition)
+        {
+            for (var x = 0; x < _map.GetLength(0); x++)
+            {
+                for (var y = 0; y < _map.GetLength(1); y++)
+                {
+                    var distance = (int)DistanceBetweenPoints(new Vector2(x,y), holder.Character.XyPosition());
+                    _map[x, y].DistanceLevel += distance;
+                }
+            }
+        }
+    }
+
+    private void InsertCharacterThreatValues(Vector2 position)
+    {
+        var width = GameObject.Find("Floor").GetComponent<FloorHighlight>().Width;
+        var height = GameObject.Find("Floor").GetComponent<FloorHighlight>().Height;
+
+        var playerThreatValue = 4;
+        
+        Vector2 startPosition = new Vector2(position.x - (playerThreatValue - 1), position.y - (playerThreatValue - 1));
+        var squareSize = (playerThreatValue*2) - 1;
+        for (var x = 0; x < squareSize; x++)
+        {
+            for (var y = 0; y < squareSize; y++)
+            {
+                var newX = startPosition.x + x;
+                var newY = startPosition.y + y;
+                if (newX > width - 1 || newX < 0) continue;
+                if (newY > height - 1 || newY < 0) continue;
+
+                var distance = DistanceBetweenPoints(new Vector2(newX, newY), position);
+                if (distance < playerThreatValue)
+                {
+                    _map[(int)newX, (int) newY].ThreatLevel += (playerThreatValue - (int) distance);
+                }
+            }
+        }
+    }
+
+    private Vector2 FindNewPosition()
+    {
+        var width = GameObject.Find("Floor").GetComponent<FloorHighlight>().Width;
+        var height = GameObject.Find("Floor").GetComponent<FloorHighlight>().Height;
+        List<MapTile> potentiaMapTiles = new List<MapTile>();
+
+        for (var x = 0; x < width; x++)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                if (_map[x, y].IsAvaliable == false) continue;
+                var distance = DistanceBetweenPoints(_targetPosition, new Vector2(x, y));
+                if (distance <= _character.AttackRange.y && distance >= _character.AttackRange.x)
+                {
+                    potentiaMapTiles.Add(_map[x,y]);
+                }
+
+            }
+        }
+        potentiaMapTiles = new List<MapTile>(potentiaMapTiles.OrderByDescending(p => p.DistanceLevel).ThenBy(p => p.ThreatLevel));
+
+        return potentiaMapTiles[0].Position;
+    }
+
     private void CheckAttackRange()
     {
         _targetPosition = _targetCharacter.XyPosition();
         _position = _character.XyPosition();
 
         //1 is attack range
-        if (DistanceBetweenCharacters() <= 1f)
+        if (DistanceBetweenCharacters() <= _character.AttackRange.y && DistanceBetweenCharacters() >= _character.AttackRange.x)
         {
             _attacking = true;
             StartCoroutine(HighlightAttackRange());
@@ -288,7 +488,7 @@ public class AI : MonoBehaviour
 
     }
 
-    private void SetFlatPath(int range)
+    private void SetFlatPath(Vector2 range)
     {
         bool[,] map = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorMap;
         map[(int)_targetPosition.x, (int)_targetPosition.y] = true;
@@ -297,7 +497,7 @@ public class AI : MonoBehaviour
 
         AStar pathFinder = new AStar(searchParameters);
         flatPath = pathFinder.FindPath();
-        if (flatPath.Count > range) flatPath = flatPath.GetRange(0, range);
+        if (flatPath.Count > range.y) flatPath = flatPath.GetRange((int) range.x, (int) (range.y - range.x));
         _movementCount = 0;
     } 
 
