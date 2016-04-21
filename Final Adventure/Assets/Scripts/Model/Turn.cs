@@ -26,6 +26,7 @@ public class Turn
 
     public void Skip()
     {
+        GameObject.Find("Util").GetComponent<APIController>().SetAction("Wait");
         Moved = true;
         CompletedAction = true;
         Rotated = true;

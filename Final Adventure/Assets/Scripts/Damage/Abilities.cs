@@ -26,6 +26,7 @@ public class Abilities
         characterHolder.Turn.CompletedAction = _damage.Heal(_caster, _pointer);
         if (characterHolder.Turn.CompletedAction) particleController.Play(_pointer);
 
+        GameObject.Find("Util").GetComponent<APIController>().SetAction("Heal");
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
@@ -40,6 +41,7 @@ public class Abilities
         characterHolder.Turn.CompletedAction = _damage.Flare(_caster, _pointer);
         if (characterHolder.Turn.CompletedAction) particleController.Play(_pointer);
 
+        GameObject.Find("Util").GetComponent<APIController>().SetAction("Flare");
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
@@ -58,6 +60,7 @@ public class Abilities
 
         characterHolder.Turn.CompletedAction = _damage.Focus(_caster, _pointer);
 
+        GameObject.Find("Util").GetComponent<APIController>().SetAction("Focus");
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
@@ -69,6 +72,7 @@ public class Abilities
         CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
         characterHolder.Turn.CompletedAction = _damage.Attack(_caster, _pointer);
 
+        GameObject.Find("Util").GetComponent<APIController>().SetAction("Attack");
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();

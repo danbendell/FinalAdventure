@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Damage;
 using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 using Assets.Scripts.Util;
@@ -80,8 +81,12 @@ public class AI : MonoBehaviour
         _targetPosition = _targetCharacter.XyPosition();
         _position = _character.XyPosition();
         
-        //1 is attack range
-        if (DistanceBetweenCharacters() > _character.AttackRange.y)
+        if (DistanceBetweenCharacters() == 0)
+        {
+            //SelfCast
+            CheckSelf();
+        }
+        else if (DistanceBetweenCharacters() > _character.AttackRange.y)
         {
             StartCoroutine(WalkTowardsPlayer());
         }
@@ -95,18 +100,29 @@ public class AI : MonoBehaviour
         }
     }
 
+    private void CheckSelf()
+    {
+        Heal heal = new Heal();
+        if (_character.Mana > heal.Cost)
+        {
+            Heal();
+            StartCoroutine(WalkAwayFromPlayer());
+        }
+        
+    }
+
     private float DistanceBetweenCharacters()
     {
-        float differenceInX = CalculatePositiveDifference(_position.x, _targetPosition.x);
-        float differnceInY = CalculatePositiveDifference(_position.y, _targetPosition.y);
+        float differenceInX = CalculateUtil.CalculatePositiveDifference(_position.x, _targetPosition.x);
+        float differnceInY = CalculateUtil.CalculatePositiveDifference(_position.y, _targetPosition.y);
         float totalDifference = differenceInX + differnceInY;
         return totalDifference;
     }
 
     private float DistanceBetweenPoints(Vector2 start, Vector2 end)
     {
-        float differenceInX = CalculatePositiveDifference(start.x, end.x);
-        float differnceInY = CalculatePositiveDifference(start.y, end.y);
+        float differenceInX = CalculateUtil.CalculatePositiveDifference(start.x, end.x);
+        float differnceInY = CalculateUtil.CalculatePositiveDifference(start.y, end.y);
         float totalDifference = differenceInX + differnceInY;
         return totalDifference;
     }
@@ -156,7 +172,7 @@ public class AI : MonoBehaviour
         var targetableCharacters = new List<CharacterHolder>();
         foreach (var character in oppostion)
         {
-            if (!InAttackRange(character, cc.CurrentCharacterHolder)) continue;
+            if (!CalculateUtil.InAttackRange(character, cc.CurrentCharacterHolder)) continue;
             targetableCharacters.Add(character);
         }
 
@@ -189,7 +205,7 @@ public class AI : MonoBehaviour
             //Check they are AI
             if (!holder.IsAi) continue;
             //Check they are in range
-            if (!InAttackRange(holder, cc.CurrentCharacterHolder)) continue;
+            if (!CalculateUtil.InAttackRange(holder, cc.CurrentCharacterHolder)) continue;
             //Check they aren't full health
             if (holder.Character.Health == holder.Character.MaxHealth) continue;
 
@@ -200,35 +216,17 @@ public class AI : MonoBehaviour
         if (healableCharacters.Count <= 0) return;
 
         //Order them by health lost
-        healableCharacters = healableCharacters.OrderByDescending(x => CalcPercentHP(x)).ToList();
+        healableCharacters = healableCharacters.OrderByDescending(x => CalculateUtil.CalcPercentHP(x)).ToList();
 
-        if (CalcPercentHP(healableCharacters[0]) < 0.25f)
+        if (CalculateUtil.CalcPercentHP(healableCharacters[0]) < 0.25f)
         {
             _targetCharacter = healableCharacters[0].Character;
         }
 
-        if (CalcPercentHP(healableCharacters[0]) < 0.5f && cc.CurrentCharacterHolder.Job == CharacterHolder.Jobs.Wizard)
+        if (CalculateUtil.CalcPercentHP(healableCharacters[0]) < 0.5f && cc.CurrentCharacterHolder.Job == CharacterHolder.Jobs.Wizard)
         {
             _targetCharacter = healableCharacters[0].Character;
         }
-    }
-
-    private bool InAttackRange(CharacterHolder defender, CharacterHolder attacker)
-    {
-        var distanceFromAI = CalcDistance(defender, attacker);
-        var attackRange = attacker.Character.AttackRange.y;
-        var movementRange = attacker.Character.Speed;
-        return (attackRange + movementRange) > distanceFromAI;
-    }
-
-    private float CalcDistance(CharacterHolder characterHolder, CharacterHolder ai)
-    {
-        var characterPos = characterHolder.Character.XyPosition();
-        var _AIPos = ai.Character.XyPosition();
-
-        float differenceInX = CalculatePositiveDifference(_AIPos.x, characterPos.x);
-        float differnceInY = CalculatePositiveDifference(_AIPos.y, characterPos.y);
-        return differenceInX + differnceInY;
     }
 
     private List<CharacterHolder> OrderTargets(List<CharacterHolder> holders)
@@ -240,7 +238,7 @@ public class AI : MonoBehaviour
         foreach (var holder in holders)
         {
             //Gives a value from 0-3. Low target characters are a high priority
-            var missingHealthPriority = CalcPriority(1f - CalcPercentHP(holder), missingHpMod);
+            var missingHealthPriority = CalcPriority(1f - CalculateUtil.CalcPercentHP(holder), missingHpMod);
             //Gives a value from 0-2. Healers are mid priority
             var healChancePriority = CalcPriority(holder.Probabilities.Heal, healChanceMod);
             //Gives a value from 1-0. All attacks are standard priority
@@ -250,13 +248,6 @@ public class AI : MonoBehaviour
         }
         
         return holders.OrderByDescending(x => x.PriorityLevel).ToList();
-    }
-
-    private float CalcPercentHP(CharacterHolder characterHolder)
-    {
-        float onePercent = 1f / characterHolder.Character.MaxHealth;
-        float currentPercent = onePercent * characterHolder.Character.Health;
-        return currentPercent;
     }
 
     private float CalcPriority(float value, float mod)
@@ -473,19 +464,6 @@ public class AI : MonoBehaviour
         {
             Wait();
         }
-    }
-
-    private float CalculatePositiveDifference(float valueOne, float valueTwo)
-    {
-        if (valueOne > valueTwo)
-        {
-            return valueOne - valueTwo;
-        }
-        else
-        {
-            return valueTwo - valueOne;
-        }
-
     }
 
     private void SetFlatPath(Vector2 range)

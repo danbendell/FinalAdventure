@@ -10,8 +10,8 @@ namespace Assets.Scripts.Model
 
         public Wizard()
         {
-            MaxHealth = 20;
-            Health = 20;
+            MaxHealth = 2;
+            Health = 2;
             MaxMana = 50;
             Mana = 50;
 

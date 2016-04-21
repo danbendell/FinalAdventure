@@ -9,7 +9,7 @@ namespace Assets.Scripts.Model
         public Archer()
         {
             MaxHealth = 22;
-            Health = 22;
+            Health = 2;
             MaxMana = 20;
             Mana = 20;
 

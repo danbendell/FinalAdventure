@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Assets.Scripts.Damage;
 using Assets.Scripts.Model;
 
-public class Worrior : Character {
+public class Warrior : Character {
 
-    public Worrior()
+    public Warrior()
     {
         MaxHealth = 25;
         Health = 25;
@@ -35,7 +35,7 @@ public class Worrior : Character {
         //{ "Heal", "Flare", "Wind", "Aqua", "Earth" };
     }
 
-    public Worrior(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
+    public Warrior(int health, int mana, int strength, int defence, int magic, int resist, int speed, int accuracy,
         int evasion, int luck, int critChance, Vector2 attackRange, List<Ability> abilities, List<Spell> spells)
     {
         MaxHealth = health;

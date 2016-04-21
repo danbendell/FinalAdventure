@@ -19,9 +19,10 @@ public class CharactersController : MonoBehaviour
         {
             _currentCharacterHolder = value;
             _currentCharacterHolder.Turn = new Turn();
+            SetUpAPIData();
             GameObject.Find("Menus").GetComponent<MenuController>().Refresh(_currentCharacterHolder);
             GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
-            if(_currentCharacterHolder.IsAi) transform.GetChild(_turnNumber).GetComponent<AI>().BeginTurn();
+            if(_currentCharacterHolder.IsAi) _currentCharacterHolder.transform.GetComponent<AI>().BeginTurn();
         }
     }
 
@@ -34,7 +35,9 @@ public class CharactersController : MonoBehaviour
         CharacterHolders = new List<CharacterHolder>();
         for (var i = 0; i < transform.childCount; i++)
         {
-            CharacterHolders.Add(transform.GetChild(i).GetComponent<CharacterHolder>());
+            CharacterHolder characterHolder = transform.GetChild(i).GetComponent<CharacterHolder>();
+            characterHolder.Load();
+            CharacterHolders.Add(characterHolder);
         }
 
         CurrentCharacterHolder = CharacterHolders[0];
@@ -45,20 +48,40 @@ public class CharactersController : MonoBehaviour
 	// Update is called once per frame
 	void Update () {
 	    CheckTurnStatus();
-	    CheckPointerPosition();        
-    }
+	    CheckPointerPosition();
+	    CheckDeadStatus();
+	}
 
     private void CheckTurnStatus()
     {
         if (!CurrentCharacterHolder.Turn.Complete()) return;
         //RotateCharacter();
+        if (!_currentCharacterHolder.IsAi) SendApiData();
         NextPlayer();
+    }
+
+    private void SendApiData()
+    {
+        GameObject.Find("Util").GetComponent<APIController>().SendData(_currentCharacterHolder.Turn.Moved);
     }
 
     private void RotateCharacter()
     {
         RotationNodes rotationNodes = GameObject.Find("Rotation").GetComponent<RotationNodes>();
         rotationNodes.Active = true;
+    }
+
+    private void CheckDeadStatus()
+    {
+        foreach (var characterHolder in CharacterHolders)
+        {
+            if (characterHolder.IsDead)
+            {
+                if(characterHolder == CurrentCharacterHolder) NextPlayer();
+                CharacterHolders.Remove(characterHolder);
+                break;
+            }
+        }
     }
 
     private void NextPlayer()
@@ -88,6 +111,50 @@ public class CharactersController : MonoBehaviour
             _uiCharacterStats.UpdateCharacterStats(CurrentCharacterHolder, true);
             GameObject.Find("Stats").GetComponent<StatsBar>().Hide();
         }
+    }
+
+    private void SetUpAPIData()
+    {
+        int surroundingAllyCount = GetSurroundingCharacterCount(true);
+        int surroundingOppostionCount = GetSurroundingCharacterCount(false);
+        int totalAllyCount = GetTotalCharacterCount(true);
+        int totalOppositionCount = GetTotalCharacterCount(false);
+        string job = _currentCharacterHolder.Job.ToString();
+        float healthPercent = CalculateUtil.CalcPercentHP(_currentCharacterHolder);
+        float manaPercent = CalculateUtil.CalcPercentMP(_currentCharacterHolder);
+
+        GameObject.Find("Util").GetComponent<APIController>().SetData(surroundingAllyCount, surroundingOppostionCount, totalAllyCount, totalOppositionCount, job, healthPercent, manaPercent);
+    }
+
+    private int GetSurroundingCharacterCount(bool isAllyCount)
+    {
+        int allyCount = 0;
+        int oppositionCount = 0;
+
+        foreach (var characterHolder in CharacterHolders)
+        {
+            if(characterHolder == _currentCharacterHolder) continue;
+            if(CalculateUtil.InAttackRange(characterHolder, _currentCharacterHolder) == false) continue;
+
+            if (characterHolder.IsAi) oppositionCount++;
+            else allyCount++;
+        }
+        return isAllyCount ? allyCount : oppositionCount;
+    }
+
+    private int GetTotalCharacterCount(bool isAllyCount)
+    {
+        int allyCount = 0;
+        int oppositionCount = 0;
+
+        foreach (var characterHolder in CharacterHolders)
+        {
+            if (characterHolder == _currentCharacterHolder) continue;
+
+            if (characterHolder.IsAi) oppositionCount++;
+            else allyCount++;
+        }
+        return isAllyCount ? allyCount : oppositionCount;
     }
 
     public void HighlightCharacterMovement()

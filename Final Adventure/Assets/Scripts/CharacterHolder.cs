@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 using Assets.Scripts.Util;
+using UnityEngine.Networking.NetworkSystem;
 using UnityEngine.UI;
 
 public class CharacterHolder : MonoBehaviour
@@ -14,7 +15,8 @@ public class CharacterHolder : MonoBehaviour
     public float PriorityLevel;
     public Turn Turn;
     public bool IsAi;
-    
+
+    public bool IsDead;
 
     public Jobs Job;
     public enum Jobs
@@ -25,7 +27,7 @@ public class CharacterHolder : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start () {
+    public void Load () {
         switch (Job)
         {
             case Jobs.Wizard:
@@ -35,7 +37,7 @@ public class CharacterHolder : MonoBehaviour
                 Character = new Archer();
                 break;
             case Jobs.Worrior:
-                Character = new Worrior();
+                Character = new Warrior();
                 break;
         }
         Character.Position = transform.position;
@@ -46,7 +48,8 @@ public class CharacterHolder : MonoBehaviour
 	// Update is called once per frame
 	void Update () {
         KeyboardInput();
-    }
+	    CheckStatus();
+	}
 
     private void KeyboardInput()
     {
@@ -67,6 +70,27 @@ public class CharacterHolder : MonoBehaviour
                 CompleteAction(action, tile, pointer);
             }
         }
+    }
+
+    private void CheckStatus()
+    {
+        if (Character.Health <= 0)
+        {
+            RemoveCharacter();
+        }
+
+        if (transform.localScale.x <= 0.1f)
+        {
+            if (IsDead) return;
+            ParticleController particleController = GameObject.Find("Dead").GetComponent<ParticleController>();
+            particleController.Play(Character.XyPosition());
+            IsDead = true;
+        }
+    }
+
+    private void RemoveCharacter()
+    {
+        transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(0, 0, 0), 5f * Time.deltaTime);
     }
 
     private void CompleteAction(ActionBarItem.Actions action, Tile tile, Vector2 pointer)
