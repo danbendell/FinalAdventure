@@ -13,6 +13,8 @@ public class Movement : MonoBehaviour
     private Vector3 _nextTile;
     private int _movementCount = 0;
 
+    private Turn _turn;
+
     public States State = States.NotMoved;
     public enum States
     {
@@ -42,6 +44,7 @@ public class Movement : MonoBehaviour
         if (transform.position == _optimalMovementPath[_optimalMovementPath.Count - 1])
         {
            State = States.AtDestination;
+            _turn.Moved = true;
             GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
             _optimalMovementPath = new List<Vector3>();
         }
@@ -57,8 +60,9 @@ public class Movement : MonoBehaviour
         _character = character;
     }
 
-    public void SetPosition(Tile tile, Vector2 pointer)
+    public void SetPosition(Tile tile, Vector2 pointer, Turn turn)
     {
+        _turn = turn;
         SetPosition(new Vector3(pointer.x, tile.GetHeight(), pointer.y));
         GameObject.Find("Floor").GetComponent<FloorHighlight>().SetNewPosition();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().HighlLightNewPositionTile();

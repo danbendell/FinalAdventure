@@ -23,7 +23,7 @@ public class CharacterHolder : MonoBehaviour
     {
         Wizard,
         Archer,
-        Worrior
+        Warrior
     }
 
     // Use this for initialization
@@ -36,7 +36,7 @@ public class CharacterHolder : MonoBehaviour
             case Jobs.Archer:
                 Character = new Archer();
                 break;
-            case Jobs.Worrior:
+            case Jobs.Warrior:
                 Character = new Warrior();
                 break;
         }
@@ -78,14 +78,6 @@ public class CharacterHolder : MonoBehaviour
         {
             RemoveCharacter();
         }
-
-        if (transform.localScale.x <= 0.1f)
-        {
-            if (IsDead) return;
-            ParticleController particleController = GameObject.Find("Dead").GetComponent<ParticleController>();
-            particleController.Play(Character.XyPosition());
-            IsDead = true;
-        }
     }
 
     private void RemoveCharacter()
@@ -109,8 +101,7 @@ public class CharacterHolder : MonoBehaviour
         if (action == ActionBarItem.Actions.Move)
         {
             if (tile.GetState() != Tile.State.Walkable) return;
-            transform.GetComponent<Movement>().SetPosition(tile, pointer);
-            Turn.Moved = true;
+            transform.GetComponent<Movement>().SetPosition(tile, pointer, Turn);
             GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         }
 
@@ -143,6 +134,12 @@ public class CharacterHolder : MonoBehaviour
             {
                 if (tile.GetState() != Tile.State.Attackable) return;
                 abilities.Focus();
+            }
+
+            if (ability == AbilityBarItem.Abilities.Slash)
+            {
+                if (tile.GetState() != Tile.State.Attackable) return;
+                abilities.Slash();
             }
         }
     }

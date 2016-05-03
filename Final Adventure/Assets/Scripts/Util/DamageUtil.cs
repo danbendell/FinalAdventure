@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Security.Policy;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Abilities;
 using Assets.Scripts.Model;
 using Flare = Assets.Scripts.Damage.Flare;
 
@@ -58,6 +59,30 @@ public class DamageUtil {
 
         float hitChanceBase = GetAttackType(attacker);
         hitChanceBase *= focus.AccuracyMod;
+        damage *= CalculateHitChance(defender, attacker, hitChanceBase);
+
+        return Mathf.RoundToInt(damage);
+    }
+
+    public int CalculateSlashDamage(Character defender, Character attacker)
+    {
+        /*
+           D = (((2 * LV + 10) / 250) * (SV / DV) * B + 2) * Mod
+           D = Damage
+           LV = Level
+           SV = Strength Value
+           DV = Defenece Value
+           B = Focus Base Value
+           Mod = Modifiers
+       */
+        Slash slash = new Slash();
+        float stageOne = (2f * 1f + 10f) / 250f;
+        float stageTwo = (float)attacker.Strength / (float)defender.Defence;
+        float stageThree = stageOne * stageTwo * slash.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+
+        float hitChanceBase = GetAttackType(attacker);
+        hitChanceBase *= slash.AccuracyMod;
         damage *= CalculateHitChance(defender, attacker, hitChanceBase);
 
         return Mathf.RoundToInt(damage);

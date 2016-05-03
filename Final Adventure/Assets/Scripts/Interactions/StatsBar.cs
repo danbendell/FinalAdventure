@@ -3,7 +3,7 @@ using System.Collections;
 
 public class StatsBar : MonoBehaviour {
 
-    private bool _enabled = true;
+    public bool _enabled = true;
 
     // Use this for initialization
     void Start () {

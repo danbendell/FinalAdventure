@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Abilities;
 using Assets.Scripts.Model;
 using Flare = Assets.Scripts.Damage.Flare;
 
@@ -56,6 +57,20 @@ public class Damage : MonoBehaviour
 
         Focus focus = new Focus();
         return focus.Cast(Attacker, Defender, damageAmount);
+    }
+
+    public bool Slash(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateSlashDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
+
+        Slash slash = new Slash();
+        return slash.Cast(Attacker, Defender, damageAmount);
     }
 
     public bool Heal(Character healer, Vector2 pointer)

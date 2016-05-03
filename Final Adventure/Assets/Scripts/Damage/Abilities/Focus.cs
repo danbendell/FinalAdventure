@@ -10,7 +10,7 @@ public class Focus : Ability
     public Focus()
     {
         Name = "Focus";
-        Power = 20f;
+        Power = 35f;
         Cost = 5f;
         AccuracyMod = 1.15f;
     }

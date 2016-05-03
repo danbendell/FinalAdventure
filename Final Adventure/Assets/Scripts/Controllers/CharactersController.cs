@@ -19,10 +19,15 @@ public class CharactersController : MonoBehaviour
         {
             _currentCharacterHolder = value;
             _currentCharacterHolder.Turn = new Turn();
-            SetUpAPIData();
+            SetUpAPIData(!_currentCharacterHolder.IsAi);
+            GetAPIData();
             GameObject.Find("Menus").GetComponent<MenuController>().Refresh(_currentCharacterHolder);
             GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
-            if(_currentCharacterHolder.IsAi) _currentCharacterHolder.transform.GetComponent<AI>().BeginTurn();
+            if (_currentCharacterHolder.IsAi)
+            {
+                AI ai = _currentCharacterHolder.transform.GetComponent<AI>();
+                StartCoroutine(ai.BeginTurn());
+            }
         }
     }
 
@@ -62,7 +67,7 @@ public class CharactersController : MonoBehaviour
 
     private void SendApiData()
     {
-        GameObject.Find("Util").GetComponent<APIController>().SendData(_currentCharacterHolder.Turn.Moved);
+        APIController.SendData(_currentCharacterHolder.Turn.Moved);
     }
 
     private void RotateCharacter()
@@ -75,9 +80,12 @@ public class CharactersController : MonoBehaviour
     {
         foreach (var characterHolder in CharacterHolders)
         {
-            if (characterHolder.IsDead)
+            if (characterHolder.Character.Health <= 0)
             {
-                if(characterHolder == CurrentCharacterHolder) NextPlayer();
+                ParticleController particleController = GameObject.Find("Dead").GetComponent<ParticleController>();
+                particleController.Play(characterHolder.Character.XyPosition());
+
+                if (characterHolder == CurrentCharacterHolder) NextPlayer();
                 CharacterHolders.Remove(characterHolder);
                 break;
             }
@@ -113,17 +121,22 @@ public class CharactersController : MonoBehaviour
         }
     }
 
-    private void SetUpAPIData()
+    private void SetUpAPIData(bool isHuman)
     {
-        int surroundingAllyCount = GetSurroundingCharacterCount(true);
-        int surroundingOppostionCount = GetSurroundingCharacterCount(false);
-        int totalAllyCount = GetTotalCharacterCount(true);
-        int totalOppositionCount = GetTotalCharacterCount(false);
+        int surroundingAllyCount = GetSurroundingCharacterCount(isHuman);
+        int surroundingOppostionCount = GetSurroundingCharacterCount(!isHuman);
+        int totalAllyCount = GetTotalCharacterCount(isHuman);
+        int totalOppositionCount = GetTotalCharacterCount(!isHuman);
         string job = _currentCharacterHolder.Job.ToString();
         float healthPercent = CalculateUtil.CalcPercentHP(_currentCharacterHolder);
         float manaPercent = CalculateUtil.CalcPercentMP(_currentCharacterHolder);
 
-        GameObject.Find("Util").GetComponent<APIController>().SetData(surroundingAllyCount, surroundingOppostionCount, totalAllyCount, totalOppositionCount, job, healthPercent, manaPercent);
+        APIController.SetData(surroundingAllyCount, surroundingOppostionCount, totalAllyCount, totalOppositionCount, job, healthPercent, manaPercent);
+    }
+
+    private void GetAPIData()
+    {
+        APIController.GetData();
     }
 
     private int GetSurroundingCharacterCount(bool isAllyCount)
@@ -133,8 +146,10 @@ public class CharactersController : MonoBehaviour
 
         foreach (var characterHolder in CharacterHolders)
         {
-            if(characterHolder == _currentCharacterHolder) continue;
-            if(CalculateUtil.InAttackRange(characterHolder, _currentCharacterHolder) == false) continue;
+            if (characterHolder == _currentCharacterHolder) continue;
+            if (characterHolder.Character.Health <= 0) continue;
+            if (CalculateUtil.InAttackRange(_currentCharacterHolder, characterHolder) == false) continue;
+
 
             if (characterHolder.IsAi) oppositionCount++;
             else allyCount++;
@@ -149,8 +164,7 @@ public class CharactersController : MonoBehaviour
 
         foreach (var characterHolder in CharacterHolders)
         {
-            if (characterHolder == _currentCharacterHolder) continue;
-
+            if (characterHolder.Character.Health <= 0) continue;
             if (characterHolder.IsAi) oppositionCount++;
             else allyCount++;
         }

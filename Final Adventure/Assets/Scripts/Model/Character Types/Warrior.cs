@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Abilities;
 using Assets.Scripts.Model;
 
 public class Warrior : Character {
@@ -10,8 +11,8 @@ public class Warrior : Character {
     {
         MaxHealth = 25;
         Health = 25;
-        MaxMana = 15;
-        Mana = 15;
+        MaxMana = 16;
+        Mana = 16;
 
         Strength = 20;
         Defence = 12;
@@ -19,7 +20,7 @@ public class Warrior : Character {
         Resist = 9;
 
         Speed = 4;
-        Accuracy = 15;
+        Accuracy = 13;
         Evasion = 10;
         Luck = 5;
         CritChance = 5;
@@ -27,10 +28,11 @@ public class Warrior : Character {
         AttackRange = new Vector2(0, 1);
 
         Abilities = new List<Ability>();
+        Abilities.Add(new Slash());
         //Possible things for the future like increase magic or magic resist
 
         Spells = new List<Spell>();
-        //Spells.Add(new Heal());
+        Spells.Add(new Heal());
         //Spells.Add(new Damage.Flare());
         //{ "Heal", "Flare", "Wind", "Aqua", "Earth" };
     }
@@ -62,6 +64,6 @@ public class Warrior : Character {
 
     public override CharacterHolder.Jobs Job()
     {
-        return CharacterHolder.Jobs.Worrior;
+        return CharacterHolder.Jobs.Warrior;
     }
 }

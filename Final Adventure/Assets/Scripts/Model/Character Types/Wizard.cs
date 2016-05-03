@@ -10,8 +10,8 @@ namespace Assets.Scripts.Model
 
         public Wizard()
         {
-            MaxHealth = 2;
-            Health = 2;
+            MaxHealth = 20;
+            Health = 20;
             MaxMana = 50;
             Mana = 50;
 
@@ -21,8 +21,8 @@ namespace Assets.Scripts.Model
             Resist = 12;
 
             Speed = 3;
-            Accuracy = 10;
-            Evasion = 10;
+            Accuracy = 11;
+            Evasion = 12;
             Luck = 5;
             CritChance = 5;
 

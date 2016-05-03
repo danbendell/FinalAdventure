@@ -55,7 +55,26 @@ module.exports = function(router)
 
     router.get('/api/Turn', function (req, res)
     {
+        console.log(req.headers);
+        var Job =  "'" + req.headers.job + "'";
 
+        var sqlQuery =  'SELECT [SurroundingAllyCount] ' +
+                        ',[SurroundingOppositionCount] ' +
+                        ',[TotalAllyCount] ' +
+                        ',[TotalOppositionCount] ' +
+                        ',[Job] ' +
+                        ',[HealthPercent] ' +
+                        ',[ManaPercent] ' +
+                        ',[Move] ' +
+                        ',[Action] ' +
+        'FROM [PRCO304-FinalAdventure].[dbo].[Turns] ' +
+        'WHERE [SurroundingAllyCount] = ' + req.headers.surroundingallycount +
+        ' AND [SurroundingOppositionCount] = ' + req.headers.surroundingoppositioncount +
+        ' AND [TotalAllyCount] = ' + req.headers.totalallycount +
+        ' AND [TotalOppositionCount] = ' + req.headers.totaloppositioncount +
+        ' AND [Job] = ' + Job +
+        ' AND [HealthPercent] = ' + req.headers.healthpercent +
+        ' AND [ManaPercent] = ' +  req.headers.manapercent;
 
         var config = {
             user: 'dan',
@@ -106,12 +125,13 @@ module.exports = function(router)
                 }
                 // Query
                 var request = new sql.Request(connection);
-                request.query('select * FROM Turns', function(err, recordset) {
+                console.log(sqlQuery);
+                request.query(sqlQuery, function(err, recordset) {
                     //... error checks
                     if(err) {
                         console.log(err);
                     }
-                    console.dir(recordset);
+                    //console.dir(recordset);
                     res.status(200).send(recordset);
 
                 });

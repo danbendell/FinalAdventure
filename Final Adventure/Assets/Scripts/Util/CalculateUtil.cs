@@ -1,15 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Scripts.Model;
 
 public static class CalculateUtil {
 
-    public static float CalcDistance(CharacterHolder characterHolder, CharacterHolder ai)
+    public static float CalcDistance(CharacterHolder characterHolder, CharacterHolder targetCharacterHolder)
     {
         var characterPos = characterHolder.Character.XyPosition();
-        var _AIPos = ai.Character.XyPosition();
+        var targetPos = targetCharacterHolder.Character.XyPosition();
 
-        float differenceInX = CalculatePositiveDifference(_AIPos.x, characterPos.x);
-        float differnceInY = CalculatePositiveDifference(_AIPos.y, characterPos.y);
+        float differenceInX = CalculatePositiveDifference(targetPos.x, characterPos.x);
+        float differnceInY = CalculatePositiveDifference(targetPos.y, characterPos.y);
+        return differenceInX + differnceInY;
+    }
+
+    public static float CalcDistance(Character character, Character targetCharacter)
+    {
+        var characterPos = character.XyPosition();
+        var targetPos = targetCharacter.XyPosition();
+
+        float differenceInX = CalculatePositiveDifference(targetPos.x, characterPos.x);
+        float differnceInY = CalculatePositiveDifference(targetPos.y, characterPos.y);
         return differenceInX + differnceInY;
     }
 
@@ -44,6 +55,6 @@ public static class CalculateUtil {
         int distanceFromAI = (int) CalcDistance(defender, attacker);
         int attackRange = (int) attacker.Character.AttackRange.y;
         int movementRange = attacker.Character.Speed;
-        return (attackRange + movementRange) > distanceFromAI;
+        return (attackRange + movementRange) >= distanceFromAI;
     }
 }

@@ -8,16 +8,19 @@ using RestSharp;
 using RestSharp.Deserializers;
 using RestSharp.Serializers;
 
-public class APIController : MonoBehaviour
+public static class APIController
 {
 
     private const string URL = "http://localhost:8070/api";
     private const string TURN = "Turn";
 
-    private DTOTurn dtoTurn = new DTOTurn();
+    public static List<DTOTurn> TurnList = new List<DTOTurn>(); 
 
-    public void SetData(int surroundingAllyCount, int surroundingOppositionCount, int totalAllyCount, int totalOppositionCount, string job, float healthPercent, float manaPercent)
+    private static DTOTurn dtoTurn = new DTOTurn();
+
+    public static void SetData(int surroundingAllyCount, int surroundingOppositionCount, int totalAllyCount, int totalOppositionCount, string job, float healthPercent, float manaPercent)
     {
+        dtoTurn = new DTOTurn();
         dtoTurn.SurroundingAllyCount = surroundingAllyCount;
         dtoTurn.SurroundingOppositionCount = surroundingOppositionCount;
         dtoTurn.TotalAllyCount = totalAllyCount;
@@ -27,12 +30,12 @@ public class APIController : MonoBehaviour
         dtoTurn.ManaPercent = manaPercent;
     }
 
-    public void SetAction(string action)
+    public static void SetAction(string action)
     {
         dtoTurn.Action = action;
     }
 
-    public void SendData(bool move)
+    public static void SendData(bool move)
     {
         var client = new RestClient(URL);
 
@@ -51,20 +54,24 @@ public class APIController : MonoBehaviour
         });
     }
 
-    public void GetData()
+    public static void GetData()
     {
         var client = new RestClient(URL);
         var request = new RestRequest(TURN, Method.GET);
+        request.AddHeader("SurroundingAllyCount", dtoTurn.SurroundingAllyCount.ToString());
+        request.AddHeader("SurroundingOppositionCount", dtoTurn.SurroundingOppositionCount.ToString());
+        request.AddHeader("TotalAllyCount", dtoTurn.TotalAllyCount.ToString());
+        request.AddHeader("TotalOppositionCount", dtoTurn.TotalOppositionCount.ToString());
+        request.AddHeader("Job", dtoTurn.Job);
+        request.AddHeader("HealthPercent", dtoTurn.HealthPercent.ToString());
+        request.AddHeader("ManaPercent", dtoTurn.ManaPercent.ToString());
 
         client.ExecuteAsync<List<DTOTurn>>(request, response => {
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                print(response.Content);
                 JsonDeserializer JSON = new JsonDeserializer();
 
-                List<DTOTurn> myObject =
-                    JSON.Deserialize<List<DTOTurn>>(response);
-                print(myObject);
+                TurnList = JSON.Deserialize<List<DTOTurn>>(response);
             }
         });
     }

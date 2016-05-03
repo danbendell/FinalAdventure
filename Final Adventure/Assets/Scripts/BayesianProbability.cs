@@ -57,6 +57,7 @@ public class BayesianProbability
 
         float mod = 1.0f;
         if (characterHolder.Job == CharacterHolder.Jobs.Archer) mod = 1.2f;
+        if (characterHolder.Job == CharacterHolder.Jobs.Warrior) mod = 1.2f;
 
         float allies = allyNearCharacter / AINearCharacter;
         float health = TargetPercentHP / AIPercentHP;
@@ -68,53 +69,6 @@ public class BayesianProbability
 
         if (!InAttackRange(_AI, characterHolder)) result = 0f;
         return result;
-    }
-
-    private float ProbabilityOfAttack(CharacterHolder characterHolder)
-    {
-        float attackProbability = 0f;
-
-        var distanceFromAI = CalcDistance(characterHolder, _AI);
-        var attackRange = characterHolder.Character.AttackRange.y;
-        var movementRange = characterHolder.Character.Speed;
-        if ((attackRange + movementRange) > distanceFromAI)
-        {
-            attackProbability = 0.5f;
-            //Possible for character to attack AI
-            var characterPercentHP = CalcPercentHP(characterHolder);
-            var AIPercentHP = CalcPercentHP(_AI);
-            if (characterPercentHP > AIPercentHP)
-            {
-                attackProbability = 0.75f;
-                //Greater chance of attack
-                //The health percentage is in the favor of the attacker
-                var simulatedDamage = CalcPotentialDamage(characterHolder);
-                if (_AI.Character.Health < simulatedDamage)
-                {
-                    //Greatest chance of attack
-                    //Should result in a kill
-                    attackProbability = 0.9f;
-                }
-            }
-            else
-            {
-                //Less chance of attack
-                //The health percentage is in the favor of the defender
-                //Sim AI HP (0.6) vs Char HP (0.2)
-                //0.4
-                var HPPercentDifference = AIPercentHP - characterPercentHP;
-                //AP 0.5 -= 0.2
-                attackProbability -= (HPPercentDifference / 2);
-                //keep it to 2DP
-                attackProbability = Mathf.Round(attackProbability * 100f) / 100f;
-            }
-        }
-
-        //Can't ever be 100% sure, this accounts for poor dicision making
-        //and other unknown stratagies 
-        if (attackProbability > 0.9f) attackProbability = 0.9f;
-
-        return attackProbability;
     }
 
     private float ProbabilityOfMovement(CharacterHolder characterHolder)
@@ -186,39 +140,6 @@ public class BayesianProbability
         return healProbability;
     }
 
-    private float ProbabilityOfHeal(CharacterHolder characterHolder)
-    {
-        float healProbability = 0f;
-        var characterPercentHP = CalcPercentHP(characterHolder);
-        if (characterPercentHP < 0.75f)
-        {
-            //Set it at an 50 50 chance of heal
-            healProbability = 0.5f;
-            //Increase that heal potential based on how low the health is
-            healProbability += 0.75f - characterPercentHP;
-            //increase the chance beacuse the job is a wizard
-            if (characterHolder.Job == CharacterHolder.Jobs.Wizard)
-            {
-                healProbability = increaseProbability(healProbability, 0.8f);
-            }
-        }
-
-        //Healing allies
-        List<CharacterHolder> allyNearCharacter = GetAlliesAround(characterHolder);
-        foreach (var ally in allyNearCharacter)
-        {
-            var allyPercentHP = CalcPercentHP(ally);
-            healProbability = increaseProbability(healProbability, 1 - allyPercentHP);
-
-            if (characterHolder.Job == CharacterHolder.Jobs.Wizard)
-            {
-                healProbability = increaseProbability(healProbability, 0.8f);
-            }
-            
-        }
-        return healProbability;
-    }
-
     private float ToTwoDecimalPlaces(float value)
     {
         return Mathf.Round(value * 100f) / 100f;
@@ -244,6 +165,7 @@ public class BayesianProbability
         float mod = 1f;
         if (characterHolder.Job == CharacterHolder.Jobs.Wizard) mod = 1.5f;
         if (characterHolder.Job == CharacterHolder.Jobs.Archer) mod = 0.8f;
+        if (characterHolder.Job == CharacterHolder.Jobs.Warrior) mod = 0.7f;
 
         List<float> calcIndividualDamageProb = new List<float>();
         foreach (var damage in damageTakenPercent)

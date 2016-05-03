@@ -8,6 +8,7 @@ using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 using Assets.Scripts.Util;
 using UnityEditor;
+using Flare = Assets.Scripts.Damage.Flare;
 
 public class AI : MonoBehaviour
 {
@@ -19,10 +20,10 @@ public class AI : MonoBehaviour
     private Character _targetCharacter;
     private Vector2 _targetPosition;
 
+    private bool _isTargetOpposition;
+    private bool _finishedMoving;
+
     private int _minimumThreatValue;
-
-    private bool _attacking = false;
-
    
     public class MapTile
     {
@@ -49,9 +50,19 @@ public class AI : MonoBehaviour
         StartCoroutine(AttackCharacter());
     }
 
+    private void Flare()
+    {
+        StartCoroutine(FlareCharacter());
+    }
+
     private void Heal()
     {
         StartCoroutine(HealCharacter());
+    }
+
+    private void Focus()
+    {
+        StartCoroutine(FocusCharacter());
     }
 
     private void Move()
@@ -65,58 +76,98 @@ public class AI : MonoBehaviour
     {
         CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
         if (transform.GetComponent<CharacterHolder>() != cc.CurrentCharacterHolder) return;
-        if (transform.GetComponent<Movement>().State == Movement.States.AtDestination && _attacking == false)
+        if (transform.GetComponent<Movement>().State == Movement.States.AtDestination && _finishedMoving == false)
         {
+            print("FINSIHED MOVING");
+            _finishedMoving = true;
             if (transform.GetComponent<CharacterHolder>().Turn.CompletedAction) return;
-            CheckAttackRange();
+            _position = _character.XyPosition();
+            var distance = CalculateUtil.CalcDistance(_character, _targetCharacter);
+            CompleteAction(distance);
         }
     }
 
-    public void BeginTurn()
+    public IEnumerator BeginTurn()
     {
+        yield return new WaitForSeconds(2.5f);
+
+        print("AI BEGIN TURN");
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+
         ResetValues();
         AnalyseOpposition();
+        AnalyseData();
         FindTarget();
+
+        print("FOUND TARGET");
 
         _targetPosition = _targetCharacter.XyPosition();
         _position = _character.XyPosition();
-        
-        if (DistanceBetweenCharacters() == 0)
+
+        print("TARGET POSITION - " + _targetPosition);
+        print("AI POSITION - " + _position);
+
+        AnalyseOptions();
+    }
+
+    private void AnalyseOptions()
+    {
+        var distance = CalculateUtil.CalcDistance(_character, _targetCharacter);
+        if (distance > _character.AttackRange.y || distance < _character.AttackRange.x)
         {
-            //SelfCast
-            CheckSelf();
-        }
-        else if (DistanceBetweenCharacters() > _character.AttackRange.y)
-        {
-            StartCoroutine(WalkTowardsPlayer());
-        }
-        else if (DistanceBetweenCharacters() < _character.AttackRange.x)
-        {
-            StartCoroutine(WalkAwayFromPlayer());
+            //Move
+            print("MOVE FIRST");
+            MoveIntoAttackRange(distance);
         }
         else
         {
-            CheckAttackRange();
+            //Action
+            print("COMPLETE ACTION FIRST");
+            CompleteAction(distance);
         }
     }
 
-    private void CheckSelf()
+    private void MoveIntoAttackRange(float distance)
     {
-        Heal heal = new Heal();
-        if (_character.Mana > heal.Cost)
+        if (distance > _character.AttackRange.y)
         {
-            Heal();
+            StartCoroutine(WalkTowardsPlayer());
+        }
+        else if (distance < _character.AttackRange.x)
+        {
             StartCoroutine(WalkAwayFromPlayer());
         }
-        
     }
 
-    private float DistanceBetweenCharacters()
+    private void CompleteAction(float distance)
     {
-        float differenceInX = CalculateUtil.CalculatePositiveDifference(_position.x, _targetPosition.x);
-        float differnceInY = CalculateUtil.CalculatePositiveDifference(_position.y, _targetPosition.y);
-        float totalDifference = differenceInX + differnceInY;
-        return totalDifference;
+        if (distance == 0)
+        {
+            print("SELF CAST HEAL");
+            //SelfCast
+            SelfCast();
+        }
+        //Decide what action to complete
+        if (_isTargetOpposition)
+        {
+            print("ATTACKING OPPOSITION");
+            if (distance <= _character.AttackRange.y && distance >= _character.AttackRange.x)
+            {
+                StartCoroutine(HighlightAttackRange());
+            }
+            else
+            {
+                print("TARGET NOT IN RANGE");
+                StartCoroutine(Wait());
+            }
+        }
+        else
+        {
+            //This is an Ally
+            print("NEED TO HEAL");
+            StartCoroutine(HighlightAttackRange());
+        }
+
     }
 
     private float DistanceBetweenPoints(Vector2 start, Vector2 end)
@@ -130,7 +181,7 @@ public class AI : MonoBehaviour
     private void ResetValues()
     {
         transform.GetComponent<Movement>().State = Movement.States.NotMoved;
-        _attacking = false;
+        _finishedMoving = false;
         CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
         _character = cc.CurrentCharacterHolder.Character;
     }
@@ -149,18 +200,52 @@ public class AI : MonoBehaviour
         //}
     }
 
-    private void FindTarget()
+    private void AnalyseData()
     {
-        FindOpposition();
-        FindAlliesForHealing();
+        print(APIController.TurnList);
+        //if (APIController.TurnList.Count < 10) return;
+        if (APIController.TurnList.Count > 0)
+        {
+            var orderedTurnList =
+                APIController.TurnList.GroupBy(x => x.Action).OrderByDescending(g => g.Count()).SelectMany(g => g).ToList();
+        }
+
+
     }
 
-    private void FindOpposition()
+    private void FindTarget()
+    {
+        _isTargetOpposition = FindTargetableOpposition();
+
+        if (_isTargetOpposition == false)
+        {
+            _isTargetOpposition = FindOutOfRangeOpposition();
+        }
+
+        _isTargetOpposition = !FindAlliesForHealing();
+    }
+
+    private bool FindTargetableOpposition()
     {
         var targetableCharacters = GetOppositionInAttackRange();
         
         targetableCharacters = OrderTargets(targetableCharacters);
+        if (targetableCharacters.Count == 0) return false;
+
         _targetCharacter = targetableCharacters[0].Character;
+        return true;
+    }
+
+    private bool FindOutOfRangeOpposition()
+    {
+
+        var targetableCharacters = GetOpposition();
+
+        targetableCharacters = OrderTargets(targetableCharacters);
+        if (targetableCharacters.Count == 0) return false;
+
+        _targetCharacter = targetableCharacters[0].Character;
+        return true;
     }
 
     private List<CharacterHolder> GetOppositionInAttackRange()
@@ -192,9 +277,40 @@ public class AI : MonoBehaviour
         }
 
         return opposition;
-    } 
+    }
 
-    private void FindAlliesForHealing()
+    private List<CharacterHolder> GetAlliesInHealRange()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        _character = cc.CurrentCharacterHolder.Character;
+
+        var allies = GetAllies();
+        var inRangeAllies = new List<CharacterHolder>();
+        foreach (var character in allies)
+        {
+            if (!CalculateUtil.InAttackRange(character, cc.CurrentCharacterHolder)) continue;
+            inRangeAllies.Add(character);
+        }
+
+        return inRangeAllies;
+    }
+
+    private List<CharacterHolder> GetAllies()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        var holders = cc.CharacterHolders;
+
+        var allies = new List<CharacterHolder>();
+        foreach (var holder in holders)
+        {
+            if (!holder.IsAi) continue;
+            allies.Add(holder);
+        }
+
+        return allies;
+    }
+
+    private bool FindAlliesForHealing()
     {
         CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
         var holders = cc.CharacterHolders;
@@ -213,7 +329,7 @@ public class AI : MonoBehaviour
         }
 
         //No opposition in range of attack
-        if (healableCharacters.Count <= 0) return;
+        if (healableCharacters.Count <= 0) return false;
 
         //Order them by health lost
         healableCharacters = healableCharacters.OrderByDescending(x => CalculateUtil.CalcPercentHP(x)).ToList();
@@ -221,12 +337,16 @@ public class AI : MonoBehaviour
         if (CalculateUtil.CalcPercentHP(healableCharacters[0]) < 0.25f)
         {
             _targetCharacter = healableCharacters[0].Character;
+            return true;
         }
 
         if (CalculateUtil.CalcPercentHP(healableCharacters[0]) < 0.5f && cc.CurrentCharacterHolder.Job == CharacterHolder.Jobs.Wizard)
         {
             _targetCharacter = healableCharacters[0].Character;
+            return true;
         }
+
+        return false;
     }
 
     private List<CharacterHolder> OrderTargets(List<CharacterHolder> holders)
@@ -296,10 +416,30 @@ public class AI : MonoBehaviour
         {
             SelfCast();
         }
+        else if (!_isTargetOpposition)
+        {
+            StartCoroutine(MovePointer(flatPath[_movementCount], Heal));
+        }
         else
         {
-            StartCoroutine(MovePointer(flatPath[_movementCount], Attack));
+            var action = PickAnAction();
+            StartCoroutine(MovePointer(flatPath[_movementCount], action));
         }
+    }
+
+    private Action PickAnAction()
+    {
+        if (_character.Job() == CharacterHolder.Jobs.Wizard)
+        {
+            Flare flare = new Flare();
+            if (_character.Mana > flare.Cost) return this.Flare;
+        }
+        else if (_character.Job() == CharacterHolder.Jobs.Archer)
+        {
+            Focus focus = new Focus();
+            if (_character.Mana > focus.Cost) return this.Focus;
+        }
+        return Attack;
     }
 
     private IEnumerator MovePointer(Vector2 node, Action action)
@@ -319,7 +459,7 @@ public class AI : MonoBehaviour
         var newPosition = new Vector2(0,0);
         //AR.x = 2  - DBC = 1
         //DNTM = 1
-        var distanceNeedToMove = _character.AttackRange.x - DistanceBetweenCharacters();
+        var distanceNeedToMove = _character.AttackRange.x - CalculateUtil.CalcDistance(_character, _targetCharacter);
        
         FillWithMovementPossibilities();
 
@@ -449,22 +589,6 @@ public class AI : MonoBehaviour
         return potentiaMapTiles[0].Position;
     }
 
-    private void CheckAttackRange()
-    {
-        _targetPosition = _targetCharacter.XyPosition();
-        _position = _character.XyPosition();
-
-        //1 is attack range
-        if (DistanceBetweenCharacters() <= _character.AttackRange.y && DistanceBetweenCharacters() >= _character.AttackRange.x)
-        {
-            _attacking = true;
-            StartCoroutine(HighlightAttackRange());
-        }
-        else
-        {
-            Wait();
-        }
-    }
 
     private void SetFlatPath(Vector2 range)
     {
@@ -492,8 +616,9 @@ public class AI : MonoBehaviour
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Tile tile = floor[(int)pointer.x, (int)pointer.y];
 
-        transform.GetComponent<Movement>().SetPosition(tile, pointer);
-        GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Moved = true;
+        Turn turn = GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn;
+        transform.GetComponent<Movement>().SetPosition(tile, pointer, turn);
+       
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
 
         //This is waiting for the character to move into position, continues in the update function
@@ -507,7 +632,7 @@ public class AI : MonoBehaviour
         Abilities abilities = new Abilities(_character, pointer);
         abilities.Attack();
 
-        CheckNextAction();
+        CheckMovement();
     }
 
     private IEnumerator HealCharacter()
@@ -518,26 +643,75 @@ public class AI : MonoBehaviour
         Abilities abilities = new Abilities(_character, pointer);
         abilities.Heal();
 
-        CheckNextAction();
+        CheckMovement();
     }
 
-    private void CheckNextAction()
+    private IEnumerator FlareCharacter()
     {
-        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
-        CharacterHolder ch = cc.CurrentCharacterHolder;
-        if (!ch.Turn.Moved) CheckMovement();
+        yield return new WaitForSeconds(0.5f);
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Flare();
+
+        CheckMovement();
+    }
+
+    private IEnumerator FocusCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Focus();
+
+        CheckMovement();
     }
 
     private void CheckMovement()
     {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder ch = cc.CurrentCharacterHolder;
+        if (ch.Turn.Moved) return;
+
         //Need to check in here to see if the AI wants to move away from its current position.
         //For now it is going to end its go
-        Wait();
+        if (NeedToMove())
+        {
+            StartCoroutine(WalkAwayFromPlayer());
+        }
+        else
+        {
+            StartCoroutine(Wait());
+        }
     }
 
-    private void Wait()
+    private bool NeedToMove()
     {
-        _attacking = false;
+        var opposition = GetOppositionInAttackRange();
+        var allies = GetAlliesInHealRange();
+
+        var threatCount = opposition.Count;
+        if (allies.Count > threatCount) threatCount = allies.Count;
+
+        var oppositionThreatLevel = GetTeamThreatLevel(opposition, threatCount);
+        var allyThreatLevel = GetTeamThreatLevel(allies, threatCount);
+
+        return (oppositionThreatLevel > allyThreatLevel);
+    }
+
+    private float GetTeamThreatLevel(List<CharacterHolder> characterHolders, int threatCount)
+    {
+        var threatLevel = characterHolders.Sum(characterHolder => CalculateUtil.CalcPercentHP(characterHolder));
+        threatLevel /= threatCount;
+        return threatLevel;
+    }
+
+    private IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        print("WAITING");
         GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Skip();
     }
 }
