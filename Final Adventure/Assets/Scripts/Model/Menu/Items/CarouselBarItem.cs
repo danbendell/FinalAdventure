@@ -13,6 +13,7 @@ public class CarouselBarItem : MenuBarItem
     {
         Select,
         Info,
+        Play,
         None
     }
 
@@ -38,22 +39,14 @@ public class CarouselBarItem : MenuBarItem
         base.Update();
         switch (Option)
         {
-            //case Options.Attack:
-            //    if (turn.CompletedAction) DisableItem();
-            //    else EnableItem();
-            //    break;
-            //case Options.Move:
-            //    if (turn.Moved) DisableItem();
-            //    else EnableItem();
-            //    break;
-            //case Options.Magic:
-            //    if (turn.CompletedAction) DisableItem();
-            //    else EnableItem();
-            //    break;
-            //case Options.Wait:
-            //    if (turn.CompletedAction && turn.Moved) DisableItem();
-            //    else EnableItem();
-            //    break;
+            case Options.Select:
+                break;
+            case Options.Info:
+                break;
+            case Options.Play:
+                if (GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().ChosenCharacters.Count == 5) EnableItem();
+                else DisableItem();
+                break;
         }
     }
 
@@ -68,8 +61,20 @@ public class CarouselBarItem : MenuBarItem
         switch (Option)
         {
             case Options.Select:
+                GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().PlaceCharacter();
+                GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State = MenuBar.States.Hidden;
+                GameObject.Find("MapBar").GetComponent<MapBar>().State = MenuBar.States.Enabled;
+                GameObject.Find("Stats").GetComponent<StatsBar>()._enabled = false;
+                GameObject.Find("Info").GetComponent<Text>().text = "Place the selected character within the grey area\n" +
+                                                                    "Press enter to confirm postion\n";
+                GameObject.Find("Main Camera")
+                    .GetComponent<MoveCamera>()
+                    .MoveToMap();
                 break;
             case Options.Info:
+                break;
+            case Options.Play:
+                Application.LoadLevel("MainScene");
                 break;
         }
     }

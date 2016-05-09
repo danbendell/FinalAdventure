@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using Assets.Scripts.Model;
+using Assets.Scripts.Model.Character_Types;
 using Assets.Scripts.Movement;
 using Assets.Scripts.Util;
 using UnityEngine.Networking.NetworkSystem;
@@ -11,7 +13,7 @@ public class CharacterHolder : MonoBehaviour
 {
 
     public Character Character;
-    public CharacterProbabilities Probabilities;
+    public Probabilities Probabilities;
     public float PriorityLevel;
     public Turn Turn;
     public bool IsAi;
@@ -23,7 +25,9 @@ public class CharacterHolder : MonoBehaviour
     {
         Wizard,
         Archer,
-        Warrior
+        Warrior,
+        Assassin,
+        Priest
     }
 
     // Use this for initialization
@@ -38,6 +42,12 @@ public class CharacterHolder : MonoBehaviour
                 break;
             case Jobs.Warrior:
                 Character = new Warrior();
+                break;
+            case Jobs.Assassin:
+                Character = new Assassin();
+                break;
+            case Jobs.Priest:
+                Character = new Priest();
                 break;
         }
         Character.Position = transform.position;
@@ -122,7 +132,7 @@ public class CharacterHolder : MonoBehaviour
 
             if (magic == MagicBarItem.Spells.Wind)
             {
-                //if (tile.GetState() != Tile.State.Attackable) return;
+                if (tile.GetState() != Tile.State.Attackable) return;
                 abilities.Wind();
             }
         }
@@ -140,6 +150,18 @@ public class CharacterHolder : MonoBehaviour
             {
                 if (tile.GetState() != Tile.State.Attackable) return;
                 abilities.Slash();
+            }
+
+            if (ability == AbilityBarItem.Abilities.Assassinate)
+            {
+                if (tile.GetState() != Tile.State.Attackable) return;
+                abilities.Assassinate();
+            }
+
+            if (ability == AbilityBarItem.Abilities.BloodBlade)
+            {
+                if (tile.GetState() != Tile.State.Attackable) return;
+                abilities.BloodBlade();
             }
         }
     }

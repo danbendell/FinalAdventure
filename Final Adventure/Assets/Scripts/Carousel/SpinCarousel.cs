@@ -22,7 +22,8 @@ public class SpinCarousel : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
-	    KeyboardInput();
+        if (GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State != MenuBar.States.Enabled) return;
+        KeyboardInput();
 	    UpdatePositions();
 	}
 

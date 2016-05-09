@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SubMenuBarItem : MenuBarItem
 {
 
-    public virtual void Create(GameObject item, string name, float bottom, float top)
+    public virtual void Create(GameObject item, string name, string cost, float bottom, float top)
     {
         Item = item;
         Name = name;
@@ -16,5 +16,6 @@ public class SubMenuBarItem : MenuBarItem
         item.transform.GetComponent<RectTransform>().anchorMin = AnchorMin;
         item.transform.GetComponent<RectTransform>().anchorMax = AnchorMax;
         item.transform.GetChild(0).GetComponent<Text>().text = Name;
+        item.transform.GetChild(1).GetComponent<Text>().text = cost;
     }
 }

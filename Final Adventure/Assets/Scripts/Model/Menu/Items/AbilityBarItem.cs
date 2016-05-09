@@ -13,12 +13,14 @@ public class AbilityBarItem : SubMenuBarItem
     {
         Focus,
         Slash,
+        Assassinate,
+        BloodBlade,
         None
     }
 
-    public AbilityBarItem(GameObject item, string name, float bottom, float top)
+    public AbilityBarItem(GameObject item, string name, string cost, float bottom, float top)
     {
-        base.Create(item, name, bottom, top);
+        base.Create(item, name, cost, bottom, top);
         Ability = (Abilities) Enum.Parse(typeof(Abilities), name);
     }
 
@@ -36,6 +38,16 @@ public class AbilityBarItem : SubMenuBarItem
             case Abilities.Slash:
                 Slash slash = new Slash();
                 if (mana < slash.Cost) DisableItem();
+                else EnableItem();
+                break;
+            case Abilities.Assassinate:
+                Assassinate assassinate = new Assassinate();
+                if (mana < assassinate.Cost) DisableItem();
+                else EnableItem();
+                break;
+            case Abilities.BloodBlade:
+                BloodBlade bloodBlade = new BloodBlade();
+                if (mana < bloodBlade.Cost) DisableItem();
                 else EnableItem();
                 break;
         }
@@ -56,6 +68,14 @@ public class AbilityBarItem : SubMenuBarItem
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
                 break;
             case Abilities.Slash:
+                GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
+                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
+                break;
+            case Abilities.Assassinate:
+                GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
+                GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
+                break;
+            case Abilities.BloodBlade:
                 GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
                 GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = MenuBar.States.Disabled;
                 break;

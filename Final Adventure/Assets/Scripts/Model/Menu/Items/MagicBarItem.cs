@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Magic;
 using Flare = Assets.Scripts.Damage.Flare;
 
 public class MagicBarItem : SubMenuBarItem
@@ -18,9 +19,9 @@ public class MagicBarItem : SubMenuBarItem
         None
     }
 
-    public MagicBarItem(GameObject item, string name, float bottom, float top)
+    public MagicBarItem(GameObject item, string name, string cost, float bottom, float top)
     {
-        base.Create(item, name, bottom, top);
+        base.Create(item, name, cost, bottom, top);
         Spell = (Spells) Enum.Parse(typeof(Spells), name); ;
     }
 
@@ -41,6 +42,9 @@ public class MagicBarItem : SubMenuBarItem
                 else EnableItem();
                 break;
             case Spells.Wind:
+                Wind wind = new Wind();
+                if (mana < wind.Cost) DisableItem();
+                else EnableItem();
                 break;
             case Spells.Aqua:
                 break;
@@ -68,6 +72,8 @@ public class MagicBarItem : SubMenuBarItem
                 GameObject.Find("MagicBar").GetComponent<MagicBar>().State = MenuBar.States.Disabled;
                 break;
             case Spells.Wind:
+                GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
+                GameObject.Find("MagicBar").GetComponent<MagicBar>().State = MenuBar.States.Disabled;
                 break;
             case Spells.Aqua:
                 break;

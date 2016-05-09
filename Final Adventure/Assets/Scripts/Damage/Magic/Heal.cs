@@ -10,6 +10,7 @@ namespace Assets.Scripts.Damage
             Name = "Heal";
             Power = 15f;
             Cost = 8f;
+            Base = 250f;
         }
 
         public override bool Cast(Character caster, Character reciever, int amount)

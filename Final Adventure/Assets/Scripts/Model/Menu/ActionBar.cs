@@ -119,7 +119,7 @@ public class ActionBar : MenuBar
             item.Update();
         }
         if (ItemIsActive() == false) ActiveNextAvaliableItem();
-        
+
     }
 
     private bool ItemIsActive()

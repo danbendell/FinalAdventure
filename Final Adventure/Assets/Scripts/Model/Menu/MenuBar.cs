@@ -84,35 +84,55 @@ public abstract class MenuBar : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            _selectedPosition--;
-            if (_selectedPosition < 1) _selectedPosition = 1;
-            if (ScrollPosition < 1)
+            for (int i = _selectedPosition; i < Items.Count; i++)
             {
-                if (_selectedPosition == _upperBound)
-                {
-                    _lowerBound--;
-                    _upperBound--;
-                    ScrollPosition += ScrollPercent;
-                }
+                ScrollUp();
+                if (Items[i].Active) break;
             }
+            if(_selectedPosition == Items.Count) ScrollUp();
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            _selectedPosition++;
-            if (_selectedPosition > Items.Count) _selectedPosition = Items.Count;
-            if (ScrollPosition > 0)
+            for (int i = _selectedPosition; i < Items.Count; i++)
             {
-                if (_selectedPosition == _lowerBound)
-                {
-                    _lowerBound ++;
-                    _upperBound ++;
-                    ScrollPosition -= ScrollPercent;
-                }
+                ScrollDown();
+                if (Items[i].Active) break;
             }
         }
 
         ParentScrollBar.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0, ScrollPosition);
+    }
+
+    private void ScrollUp()
+    {
+        _selectedPosition--;
+        if (_selectedPosition < 1) _selectedPosition = 1;
+        if (ScrollPosition < 1)
+        {
+            if (_selectedPosition == _upperBound)
+            {
+                _lowerBound--;
+                _upperBound--;
+                ScrollPosition += ScrollPercent;
+            }
+        }
+    }
+
+    private void ScrollDown()
+    {
+        _selectedPosition++;
+
+        if (_selectedPosition > Items.Count) _selectedPosition = Items.Count;
+        if (ScrollPosition > 0)
+        {
+            if (_selectedPosition == _lowerBound)
+            {
+                _lowerBound++;
+                _upperBound++;
+                ScrollPosition -= ScrollPercent;
+            }
+        }
     }
 
     private void AnimateMenuBar()

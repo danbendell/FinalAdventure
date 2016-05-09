@@ -117,7 +117,7 @@ public class CharactersController : MonoBehaviour
             }
 
             _uiCharacterStats.UpdateCharacterStats(CurrentCharacterHolder, true);
-            GameObject.Find("Stats").GetComponent<StatsBar>().Hide();
+            GameObject.Find("Stats").GetComponent<StatsBar>().Close();
         }
     }
 

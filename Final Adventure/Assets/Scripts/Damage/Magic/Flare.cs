@@ -10,6 +10,7 @@ namespace Assets.Scripts.Damage
             Name = "Flare";
             Power = 25f;
             Cost = 10f;
+            Base = 200f;
         }
 
         public override bool Cast(Character attacker, Character defender, int damage)

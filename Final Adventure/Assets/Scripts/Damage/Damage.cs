@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Damage;
 using Assets.Scripts.Damage.Abilities;
+using Assets.Scripts.Damage.Magic;
 using Assets.Scripts.Model;
 using Flare = Assets.Scripts.Damage.Flare;
 
@@ -73,6 +74,34 @@ public class Damage : MonoBehaviour
         return slash.Cast(Attacker, Defender, damageAmount);
     }
 
+    public bool Assassinate(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateAssassinateDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
+
+        Assassinate assassinate = new Assassinate();
+        return assassinate.Cast(Attacker, Defender, damageAmount);
+    }
+
+    public bool BloodBlade(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateBloodBladeDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
+
+        BloodBlade bloodBlade = new BloodBlade();
+        return bloodBlade.Cast(Attacker, Defender, damageAmount);
+    }
+
     public bool Heal(Character healer, Vector2 pointer)
     {
         Healer = healer;
@@ -100,7 +129,21 @@ public class Damage : MonoBehaviour
         Flare flare = new Flare();
         return flare.Cast(Attacker, Defender, damageAmount);
     }
-    
+
+    public bool Wind(Character attacker, Vector2 pointer)
+    {
+        Attacker = attacker;
+        Defender = FindCharacter(pointer);
+        if (Defender == null) return false;
+
+        DamageUtil damageUtil = new DamageUtil();
+        int damageAmount = damageUtil.CalculateWindDamage(Defender, Attacker);
+        DamageText.AnimateDamage(damageAmount);
+
+        Wind wind = new Wind();
+        return wind.Cast(Attacker, Defender, damageAmount);
+    }
+
     private Character FindCharacter(Vector2 pointer)
     {
         List<CharacterHolder> characterHolders =

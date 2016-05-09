@@ -46,8 +46,8 @@ public class MagicBar : SubMenuBar
 
             float bottom = parentHeight - ((ItemHeight * (i + 1)) + (ItemGap * i));
             float top = -(ItemHeight * i) - (ItemGap * i);
-
-            MagicBarItem ABI = new MagicBarItem(magicBarItem, _spells[i].Name, bottom, top);
+            string itemName = _spells[i].Name + "  " + _spells[i].Cost;
+            MagicBarItem ABI = new MagicBarItem(magicBarItem, _spells[i].Name, _spells[i].Cost.ToString(), bottom, top);
             Items.Add(ABI);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Magic;
 using UnityEngine;
 
 namespace Assets.Scripts.Model
@@ -15,9 +16,9 @@ namespace Assets.Scripts.Model
             MaxMana = 50;
             Mana = 50;
 
-            Strength = 14;
+            Strength = 8;
             Defence = 5;
-            Magic = 15;
+            Magic = 18;
             Resist = 12;
 
             Speed = 3;
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Model
             Spells = new List<Spell>();
             Spells.Add(new Heal());
             Spells.Add(new Damage.Flare());
+            Spells.Add(new Wind());
             //{ "Heal", "Flare", "Wind", "Aqua", "Earth" };
         }
 
@@ -65,6 +67,13 @@ namespace Assets.Scripts.Model
         public override CharacterHolder.Jobs Job()
         {
             return CharacterHolder.Jobs.Wizard;
+        }
+
+        public override string Information()
+        {
+            return "Master of Spells\n" +
+                   "Strong offensive and defensive casts\n" +
+                   "Weak physical attacks";
         }
     }
 }

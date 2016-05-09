@@ -50,8 +50,7 @@ public class AbilityBar : SubMenuBar
 
             float bottom = parentHeight - ((ItemHeight * (i + 1)) + (ItemGap * i));
             float top = -(ItemHeight * i) - (ItemGap * i);
-
-            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i].Name, bottom, top);
+            AbilityBarItem ABI = new AbilityBarItem(abilityBarItem, _abilities[i].Name, _abilities[i].Cost.ToString(), bottom, top);
             Items.Add(ABI);
         }
 

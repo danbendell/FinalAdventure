@@ -1,32 +1,33 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Model;
+using Assets.Scripts.Model.Character_Types;
 
 public class CarouselCharacterHolder : MonoBehaviour
 {
 
     public Character Character;
 
-    public Jobs Job;
-    public enum Jobs
-    {
-        Wizard,
-        Archer,
-        Worrior
-    }
+    public CharacterHolder.Jobs Job;
 
     // Use this for initialization
     void Start () {
         switch (Job)
         {
-            case Jobs.Wizard:
+            case CharacterHolder.Jobs.Wizard:
                 Character = new Wizard();
                 break;
-            case Jobs.Archer:
+            case CharacterHolder.Jobs.Archer:
                 Character = new Archer();
                 break;
-            case Jobs.Worrior:
+            case CharacterHolder.Jobs.Warrior:
                 Character = new Warrior();
+                break;
+            case CharacterHolder.Jobs.Assassin:
+                Character = new Assassin();
+                break;
+            case CharacterHolder.Jobs.Priest:
+                Character = new Priest();
                 break;
         }
     }

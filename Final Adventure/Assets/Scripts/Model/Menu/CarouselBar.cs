@@ -9,7 +9,7 @@ public class CarouselBar : MenuBar
 
     public CarouselBarItem.Options Option = CarouselBarItem.Options.None;
 
-    private List<string> _options = new List<string> { "Select", "Info" };
+    private List<string> _options = new List<string> { "Select", "Info", "Play"};
     private float _itemHeight = 45.5f;
     private float _itemGap = 2f;
 
@@ -25,7 +25,6 @@ public class CarouselBar : MenuBar
 
         Create();
 
-
     }
 
     // Update is called once per frame
@@ -33,14 +32,38 @@ public class CarouselBar : MenuBar
     {
         UpdateMenu();
         UpdateActionBar();
+        CheckCameraPosition();
 
         if (Input.GetKeyDown(KeyCode.RightShift))
         {
             if (State == MenuBar.States.Enabled) return;
-            
+            GameObject.Find("Main Camera").GetComponent<MoveCamera>().MoveToCarousel();
+            GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().RemoveCharacter();
+            GameObject.Find("Stats").GetComponent<StatsBar>()._enabled = true;
             Option = CarouselBarItem.Options.None;
             if (State == MenuBar.States.Disabled) State = MenuBar.States.Enabled;
 
+        }
+    }
+
+    private void CheckCameraPosition()
+    {
+        if (GameObject.Find("Main Camera").GetComponent<MoveCamera>().IsAtCarousel())
+        {
+            GameObject.Find("Stats").GetComponent<StatsBar>().Show();
+            GameObject.Find("CharacterCount").GetComponent<StatsBar>().Hide();
+            GameObject.Find("CarouselBar").GetComponent<CarouselBar>().Option = CarouselBarItem.Options.None;
+            GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State = MenuBar.States.Enabled;
+            GameObject.Find("MapBar").GetComponent<MapBar>().State = MenuBar.States.Hidden;
+        }
+
+        if (GameObject.Find("Main Camera").GetComponent<MoveCamera>().IsAtMap())
+        {
+            GameObject.Find("Stats").GetComponent<StatsBar>().Hide();
+            GameObject.Find("CharacterCount").GetComponent<StatsBar>().Close();
+            GameObject.Find("CarouselBar").GetComponent<CarouselBar>().Option = CarouselBarItem.Options.Select;
+            GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State = MenuBar.States.Hidden;
+            GameObject.Find("MapBar").GetComponent<MapBar>().State = MenuBar.States.Enabled;
         }
     }
 

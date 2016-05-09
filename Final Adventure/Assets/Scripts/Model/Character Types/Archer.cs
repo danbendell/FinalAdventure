@@ -13,9 +13,9 @@ namespace Assets.Scripts.Model
             MaxMana = 20;
             Mana = 20;
 
-            Strength = 10;
+            Strength = 12;
             Defence = 6;
-            Magic = 5;
+            Magic = 10;
             Resist = 8;
 
             Speed = 4;
@@ -61,6 +61,13 @@ namespace Assets.Scripts.Model
         public override CharacterHolder.Jobs Job()
         {
             return CharacterHolder.Jobs.Archer;
+        }
+
+        public override string Information()
+        {
+            return "Relentless Marksman\n" +
+                   "Attacks from range, suffers in melee combat\n" +
+                   "High accuracy & Average magic";
         }
 
     }

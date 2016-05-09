@@ -21,6 +21,7 @@ public class RotateCharacter : MonoBehaviour
 
     private void KeyboardInput()
     {
+        if (GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State != MenuBar.States.Enabled) return;
         if (Input.GetKey(KeyCode.A))
         {
             CurrentCharacter.transform.Rotate(Vector3.up, _speed);

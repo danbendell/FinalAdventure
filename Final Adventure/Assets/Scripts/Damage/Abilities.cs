@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Scripts.Damage.Abilities;
 using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 
@@ -49,8 +50,17 @@ public class Abilities
 
     public void Wind()
     {
+        CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
         ParticleController particleController = GameObject.Find("Wind").GetComponent<ParticleController>();
-        particleController.Play(_pointer);
+
+        characterHolder.Turn.CompletedAction = _damage.Wind(_caster, _pointer);
+        if (characterHolder.Turn.CompletedAction) particleController.Play(_pointer);
+
+        APIController.SetAction("Wind");
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
     }
 
     public void Focus()
@@ -74,6 +84,32 @@ public class Abilities
         characterHolder.Turn.CompletedAction = _damage.Slash(_caster, _pointer);
 
         APIController.SetAction("Slash");
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+    }
+
+    public void Assassinate()
+    {
+        CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
+
+        characterHolder.Turn.CompletedAction = _damage.Assassinate(_caster, _pointer);
+        APIController.SetAction("Assassinate");
+
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
+        GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();
+    }
+
+    public void BloodBlade()
+    {
+        CharactersController charactersController = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder characterHolder = charactersController.CurrentCharacterHolder;
+
+        characterHolder.Turn.CompletedAction = _damage.BloodBlade(_caster, _pointer);
+        APIController.SetAction("BloodBlade");
+
         GameObject.Find("ActionBar").GetComponent<ActionBar>().DisableAction();
         GameObject.Find("Floor").GetComponent<FloorHighlight>().ResetFloorHighlight();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().Show();

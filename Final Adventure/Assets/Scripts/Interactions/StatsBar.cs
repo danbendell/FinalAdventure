@@ -4,6 +4,7 @@ using System.Collections;
 public class StatsBar : MonoBehaviour {
 
     public bool _enabled = true;
+    public bool _hidden = false;
 
     // Use this for initialization
     void Start () {
@@ -17,7 +18,8 @@ public class StatsBar : MonoBehaviour {
 
     private void AnimateStatsBar()
     {
-        if (_enabled == false) Animate(-98f);
+        if (_enabled == false && _hidden == false) Animate(-98f);
+        else if (_hidden) Animate(-160);
         else Animate(145f);
     }
 
@@ -30,10 +32,19 @@ public class StatsBar : MonoBehaviour {
     public void Show()
     {
          _enabled = true;
+         _hidden = false;
+    }
+
+    public void Close()
+    {
+        _enabled = false;
+        _hidden = false;
     }
 
     public void Hide()
     {
+        _hidden = true;
         _enabled = false;
     }
+
 }

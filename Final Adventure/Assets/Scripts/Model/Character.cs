@@ -19,7 +19,7 @@ namespace Assets.Scripts.Model
         public int Strength { get; set; }
 
         public int Defence { get; set; }
-
+        
         public int Magic { get; set; }
 
         public int Resist { get; set; }
@@ -45,6 +45,11 @@ namespace Assets.Scripts.Model
         public virtual CharacterHolder.Jobs Job()
         {
             return CharacterHolder.Jobs.Wizard;
+        }
+
+        public virtual string Information()
+        {
+            return "No information";
         }
 
         public void Attack(Character defender, int amount)

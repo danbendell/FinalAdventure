@@ -3,6 +3,7 @@ using System.Collections;
 using System.Security.Policy;
 using Assets.Scripts.Damage;
 using Assets.Scripts.Damage.Abilities;
+using Assets.Scripts.Damage.Magic;
 using Assets.Scripts.Model;
 using Flare = Assets.Scripts.Damage.Flare;
 
@@ -21,15 +22,14 @@ public class DamageUtil {
     public int CalculatePhysicalDamage(Character defender, Character attacker)
     {
         /*
-            D = (((2 * LV + 10) / 250) * (SV / DV) * B + 2) * Mod
+            D = ((SV / 200) * (SV / DV) * BV + 2) * Mod
             D = Damage
-            LV = Level
             SV = Strength Value
             DV = Defenece Value
-            B = Attack Base Value
+            BV = Attack Base Value
             Mod = Modifiers
         */
-        float stageOne = (2f * 1f + 10f) / 250f;
+        float stageOne = attacker.Strength / 250f;
         float stageTwo = (float) attacker.Strength / (float) defender.Defence;
         float stageThree = stageOne * stageTwo * attacker.Strength + 2f;
         float damage = stageThree * GetModifier(attacker);
@@ -43,16 +43,16 @@ public class DamageUtil {
     public int CalculateFocusDamage(Character defender, Character attacker)
     {
         /*
-            D = (((2 * LV + 10) / 250) * (SV / DV) * B + 2) * Mod
+            D = ((PV / BV) * (SV / DV) * PV + 2) * Mod
             D = Damage
-            LV = Level
+            PV = Slash Power Value
             SV = Strength Value
             DV = Defenece Value
-            B = Focus Base Value
+            BV = Focus Base Value
             Mod = Modifiers
         */
         Focus focus = new Focus();
-        float stageOne = (2f * 1f + 10f) / 250f;
+        float stageOne = focus.Power / focus.Base;
         float stageTwo = (float)attacker.Strength / (float)defender.Defence;
         float stageThree = stageOne * stageTwo * focus.Power + 2f;
         float damage = stageThree * GetModifier(attacker);
@@ -67,16 +67,16 @@ public class DamageUtil {
     public int CalculateSlashDamage(Character defender, Character attacker)
     {
         /*
-           D = (((2 * LV + 10) / 250) * (SV / DV) * B + 2) * Mod
+           D = ((PV / BV) * (SV / DV) * PV + 2) * Mod
            D = Damage
-           LV = Level
+           PV = Slash Power Value
            SV = Strength Value
            DV = Defenece Value
-           B = Focus Base Value
+           BV = Slash Base Value
            Mod = Modifiers
        */
         Slash slash = new Slash();
-        float stageOne = (2f * 1f + 10f) / 250f;
+        float stageOne = slash.Power / slash.Base;
         float stageTwo = (float)attacker.Strength / (float)defender.Defence;
         float stageThree = stageOne * stageTwo * slash.Power + 2f;
         float damage = stageThree * GetModifier(attacker);
@@ -88,17 +88,62 @@ public class DamageUtil {
         return Mathf.RoundToInt(damage);
     }
 
+    public int CalculateAssassinateDamage(Character defender, Character attacker)
+    {
+        /*
+           D = ((PV / BV) * (DMH / DH) * PV + 2) * Mod
+           D = Damage
+           PV = Slash Power Value
+           DMH = Defenders Max Health
+           DH = Defenders Health
+           BV = Assassinate Base Value
+           Mod = Modifiers
+       */
+        Assassinate assassinate = new Assassinate();
+        float stageOne = assassinate.Power / assassinate.Base;
+        float stageTwo = (float)defender.MaxHealth / (float)defender.Health;
+        float stageThree = stageOne * stageTwo * assassinate.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+        
+        return Mathf.RoundToInt(damage);
+    }
+
+    public int CalculateBloodBladeDamage(Character defender, Character attacker)
+    {
+        /*
+           D = ((PV / BV) * (SV / DV) * PV + 2) * Mod
+           D = Damage
+           PV = Slash Power Value
+           SV = Strength Value
+           DV = Defenece Value
+           BV = BloodBlade Base Value
+           Mod = Modifiers
+       */
+        BloodBlade bloodBlade = new BloodBlade();
+        float stageOne = bloodBlade.Power / bloodBlade.Base;
+        float stageTwo = (float)defender.MaxHealth / (float)defender.Health;
+        float stageThree = stageOne * stageTwo * bloodBlade.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+
+
+        float hitChanceBase = GetAttackType(attacker);
+        damage *= CalculateHitChance(defender, attacker, hitChanceBase);
+
+        return Mathf.RoundToInt(damage);
+    }
+
     public int CalculateHealAmount(Character healer)
     {
         /*
-            H = (((2 * LV + 10) / 200) * (MV * MV) + 2) * Mod
+            H = ((P / B) * (MV * MV) + 2) * Mod
             H = Heal Amount
-            LV = Level
+            PV = Heal Power Value
+            BV = Heal Base Value
             MV = Magic Value
             Mod = Modifiers
         */
         Heal heal = new Heal();
-        float stageOne = (2f * 1f + 10f) / 200f;
+        float stageOne = heal.Power / heal.Base;
         float stageTwo = (float) healer.Magic * (float) heal.Power;
         float stageThree = stageOne * stageTwo + 2f;
         float healAmount = stageThree * GetModifier(healer);
@@ -109,20 +154,40 @@ public class DamageUtil {
     public int CalculateFlareDamage(Character defender, Character attacker)
     {
         /*
-           D = (((2 * LV + 10) / 200) * (MV / RV) * B + 2) * Mod
+           D = ((PV / BV) * (MV / RV) * PV + 2) * Mod
            D = Damage
-           LV = Level
+           PV = Flare Power Value
+           BV = Flare Base Value
            MV = Magic Value
            RV = Resist Value
-           B = Attack Base Value
            Mod = Modifiers
        */
         Flare flare = new Flare();
-        float stageOne = (2f * 1f + 10f) / 200f;
+        float stageOne = flare.Power / flare.Base;
         float stageTwo = (float)attacker.Magic / (float)defender.Resist;
         float stageThree = stageOne * stageTwo * flare.Power + 2f;
         float damage = stageThree * GetModifier(attacker);
         
+        return Mathf.RoundToInt(damage);
+    }
+
+    public int CalculateWindDamage(Character defender, Character attacker)
+    {
+        /*
+           D = ((PV / BV) * (MV / RV) * PV + 2) * Mod
+           D = Damage
+           PV = Flare Power Value
+           BV = Flare Base Value
+           MV = Magic Value
+           RV = Resist Value
+           Mod = Modifiers
+       */
+        Wind wind = new Wind();
+        float stageOne = wind.Power / wind.Base;
+        float stageTwo = (float)attacker.Magic / (float)defender.Resist;
+        float stageThree = stageOne * stageTwo * wind.Power + 2f;
+        float damage = stageThree * GetModifier(attacker);
+
         return Mathf.RoundToInt(damage);
     }
 

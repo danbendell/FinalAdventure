@@ -13,22 +13,11 @@ namespace Assets.Scripts.Damage.Abilities
         public Slash()
         {
             Name = "Slash";
-            Power = 38f;
+            Power = 22f;
             Cost = 8;
+            Base = 250f;
             AccuracyMod = 0.7f;
         }
 
-        public override bool Cast(Character attacker, Character defender, int amount)
-        {
-            if (attacker.Mana - Cost < 0) return false;
-
-            if (defender.Health > 0f)
-            {
-                attacker.Mana -= (int)Cost;
-                defender.Health -= amount;
-            }
-
-            return true;
-        }
     }
 }

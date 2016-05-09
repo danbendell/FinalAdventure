@@ -17,6 +17,10 @@ namespace Assets.Scripts.Movement
         
         public int Height { get; private set; }
 
+        public int WidthRestrict;
+
+        public int HeightRestrict;
+
         private bool[,] _floorMap;
 
         private string _material = Tile.Normal;
@@ -67,6 +71,11 @@ namespace Assets.Scripts.Movement
         {
             Width = transform.GetChild(0).childCount;
             Height = transform.childCount;
+
+            if (WidthRestrict == 0) WidthRestrict = Width;
+
+            if (HeightRestrict == 0) HeightRestrict = Height;
+
             FloorArray = new Tile[Width, Height];
 
             for (int y = 0; y < transform.childCount; y++)
@@ -113,7 +122,7 @@ namespace Assets.Scripts.Movement
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
-                if (PointerPosition.x < Width - 1)
+                if (PointerPosition.x < WidthRestrict - 1)
                 {
                     ClearPointer();
                     PointerPosition.x++;
@@ -122,7 +131,7 @@ namespace Assets.Scripts.Movement
             }
             else if (Input.GetKeyDown(KeyCode.W))
             {
-                if (PointerPosition.y < Height - 1)
+                if (PointerPosition.y < HeightRestrict - 1)
                 {
                     ClearPointer();
                     PointerPosition.y++;

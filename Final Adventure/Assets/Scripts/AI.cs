@@ -190,7 +190,7 @@ public class AI : MonoBehaviour
     {
         var aiCharacterHolder = GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder;
         BayesianProbability BP = new BayesianProbability(aiCharacterHolder);
-        //var prob = BP.CharacterProbabilities();
+        //var prob = BP.Probabilities();
         //foreach (var p in prob)
         //{
         //    print("Job = " + p.Job);

@@ -13,9 +13,9 @@ public class BayesianProbability
     private CharacterHolder _AI;
     private List<CharacterHolder> _opposition = new List<CharacterHolder>();
     private List<CharacterHolder> _aiCharacterHolders = new List<CharacterHolder>();
-    private List<CharacterProbabilities> _characterProbabilities = new List<CharacterProbabilities>();
+    private List<Probabilities> _characterProbabilities = new List<Probabilities>();
 
-    public List<CharacterProbabilities> CharacterProbabilities()
+    public List<Probabilities> CharacterProbabilities()
     {
         return _characterProbabilities;
     } 
@@ -33,7 +33,7 @@ public class BayesianProbability
 
         foreach (var characterHolder in _opposition)
         {
-            CharacterProbabilities cp = new CharacterProbabilities(characterHolder.Job)
+            Probabilities cp = new Probabilities(characterHolder.Job)
             {
                 Attack = ProbabilityOfAttackNew(characterHolder),
                 Move = ProbabilityOfMovement(characterHolder),

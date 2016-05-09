@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CharacterProbabilities {
+public class Probabilities {
 
     public CharacterHolder.Jobs Job { get; set; }
     public float Attack { get; set; }
     public float Move { get; set; }
     public float Heal { get; set; }
 
-    public CharacterProbabilities(CharacterHolder.Jobs job)
+    public Probabilities(CharacterHolder.Jobs job)
     {
         Job = job;
         Attack = 0f;

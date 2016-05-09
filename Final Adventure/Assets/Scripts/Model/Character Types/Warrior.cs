@@ -17,7 +17,7 @@ public class Warrior : Character {
         Strength = 20;
         Defence = 12;
         Magic = 5;
-        Resist = 9;
+        Resist = 5;
 
         Speed = 4;
         Accuracy = 13;
@@ -65,5 +65,12 @@ public class Warrior : Character {
     public override CharacterHolder.Jobs Job()
     {
         return CharacterHolder.Jobs.Warrior;
+    }
+
+    public override string Information()
+    {
+        return "Mightiest Warroir\n" +
+               "Strong offensive and defensive stats\n" +
+               "High health & Low magic resist";
     }
 }
