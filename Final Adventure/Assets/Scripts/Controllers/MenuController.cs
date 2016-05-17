@@ -11,7 +11,7 @@ public class MenuController : MonoBehaviour {
     public AbilityBar AbilityBar;
 
 	// Use this for initialization
-	void Start ()
+	public void Load ()
 	{
 	    ActionBar = GameObject.Find("ActionBar").GetComponent<ActionBar>();
 	    AbilityBar = GameObject.Find("AbilityBar").GetComponent<AbilityBar>();
@@ -26,6 +26,7 @@ public class MenuController : MonoBehaviour {
 
     public void Refresh(CharacterHolder characterHolder)
     {
+        Load();
         List<string> actions = new List<string> { "Attack", "Move", "Magic", "Ability", "Wait" };
         List<Ability> abilitieses = characterHolder.Character.Abilities;
         List<Spell> spells = characterHolder.Character.Spells;

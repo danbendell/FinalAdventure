@@ -17,6 +17,7 @@ namespace Assets.Scripts.Damage.Abilities
             Cost = 8;
             Base = 250f;
             AccuracyMod = 0.7f;
+            Desc = "Extremely power physical attack, lowered accuracy";
         }
 
     }

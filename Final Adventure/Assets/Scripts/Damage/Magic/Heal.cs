@@ -11,6 +11,7 @@ namespace Assets.Scripts.Damage
             Power = 15f;
             Cost = 8f;
             Base = 250f;
+            Desc = "Restores target HP";
         }
 
         public override bool Cast(Character caster, Character reciever, int amount)

@@ -11,9 +11,10 @@ namespace Assets.Scripts.Damage.Abilities
         public BloodBlade()
         {
             Name = "BloodBlade";
-            Power = 25f;
-            Cost = 10f;
+            Power = 30f;
+            Cost = 8f;
             Base = 230f;
+            Desc = "Powerful physical attack that harms the user";
         }
 
         public override bool Cast(Character attacker, Character defender, int amount)

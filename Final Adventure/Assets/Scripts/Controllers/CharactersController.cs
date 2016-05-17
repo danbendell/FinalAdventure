@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Model;
+using Assets.Scripts.Model.Menu;
 using Assets.Scripts.Movement;
 
 public class CharactersController : MonoBehaviour
@@ -21,6 +22,7 @@ public class CharactersController : MonoBehaviour
             _currentCharacterHolder.Turn = new Turn();
             SetUpAPIData(!_currentCharacterHolder.IsAi);
             GetAPIData();
+            GameObject.Find("CurrentCharacterParticles").GetComponent<FollowTarget>().BeginFollow();
             GameObject.Find("Menus").GetComponent<MenuController>().Refresh(_currentCharacterHolder);
             GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
             if (_currentCharacterHolder.IsAi)
@@ -35,34 +37,77 @@ public class CharactersController : MonoBehaviour
 
     // Use this for initialization
     void Start ()
-	{
-
-        CharacterHolders = new List<CharacterHolder>();
+    {
+    
         for (var i = 0; i < transform.childCount; i++)
         {
+            if (transform.GetChild(i).GetComponent<CharacterHolder>() != null) transform.GetChild(i).GetComponent<CharacterHolder>().enabled = true;
+            if (transform.GetChild(i).GetComponent<Movement>() != null) transform.GetChild(i).GetComponent<Movement>().enabled = true;
+            if(transform.GetChild(i).GetComponent<CarouselCharacterHolder>() != null) transform.GetChild(i).GetComponent<CarouselCharacterHolder>().enabled = false;
+            if (transform.GetChild(i).GetComponent<AI>() != null)
+            {
+                transform.GetChild(i).GetComponent<CharacterHolder>().IsAi = true;
+                transform.GetChild(i).GetComponent<AI>().enabled = true;
+            }
+
             CharacterHolder characterHolder = transform.GetChild(i).GetComponent<CharacterHolder>();
-            characterHolder.Load();
             CharacterHolders.Add(characterHolder);
         }
 
-        CurrentCharacterHolder = CharacterHolders[0];
-
         _uiCharacterStats = GameObject.Find("Canvas").GetComponent<UICharacterStats>();
+
+        StartCoroutine(StartGame());
+    }
+
+    private IEnumerator StartGame()
+    {
+        yield return new WaitForSeconds(1.0f);
+        foreach (var characterHolder in CharacterHolders)
+        {
+            characterHolder.Load();
+        }
+        CurrentCharacterHolder = CharacterHolders[0];
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
+	    if (GameObject.Find("Canvas").GetComponent<GamePause>().isEndGame) return;
+	    if (CurrentCharacterHolder == null) return;
 	    CheckTurnStatus();
 	    CheckPointerPosition();
 	    CheckDeadStatus();
+	    CheckEndGame();
 	}
 
     private void CheckTurnStatus()
     {
+        if (CurrentCharacterHolder == null) return;
         if (!CurrentCharacterHolder.Turn.Complete()) return;
         //RotateCharacter();
         if (!_currentCharacterHolder.IsAi) SendApiData();
         NextPlayer();
+    }
+
+    private void CheckEndGame()
+    {
+        for (int i = 0; i < CharacterHolders.Count; i++)
+        {
+            if (CharacterHolders[i].IsAi) break;
+            if (i == CharacterHolders.Count - 1)
+            {
+                StartCoroutine(GameObject.Find("Canvas").GetComponent<EndGameController>().ShowVictory());
+            }
+        }
+
+        for (int i = 0; i < CharacterHolders.Count; i++)
+        {
+            if (!CharacterHolders[i].IsAi) break;
+            if (i == CharacterHolders.Count - 1)
+            {
+                StartCoroutine(GameObject.Find("Canvas").GetComponent<EndGameController>().ShowDefeat());
+            }
+        }
     }
 
     private void SendApiData()
@@ -84,7 +129,8 @@ public class CharactersController : MonoBehaviour
             {
                 ParticleController particleController = GameObject.Find("Dead").GetComponent<ParticleController>();
                 particleController.Play(characterHolder.Character.XyPosition());
-
+                SoundUtil sounds = GameObject.Find("Sounds").GetComponent<SoundUtil>();
+                sounds.PlaySound(SoundUtil.Sounds.Dead);
                 if (characterHolder == CurrentCharacterHolder) NextPlayer();
                 CharacterHolders.Remove(characterHolder);
                 break;
@@ -105,6 +151,7 @@ public class CharactersController : MonoBehaviour
 
     private void CheckPointerPosition()
     {
+        _uiCharacterStats = GameObject.Find("Canvas").GetComponent<UICharacterStats>();
         for (var i = 0; i < CharacterHolders.Count; i++)
         {
             Vector2 characterPos = CharacterHolders[i].Character.XyPosition();

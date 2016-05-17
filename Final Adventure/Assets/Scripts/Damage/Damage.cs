@@ -39,7 +39,7 @@ public class Damage : MonoBehaviour
         int damageAmount = damageUtil.CalculatePhysicalDamage(Defender, Attacker);
 
         if (damageAmount == 0) DamageText.AnimateMessage("Miss");
-        DamageText.AnimateDamage(damageAmount);
+        DamageText.AnimateDamage("Attack " + damageAmount);
 
         Attacker.Attack(Defender, damageAmount);
 
@@ -54,9 +54,10 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateFocusDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
-
         Focus focus = new Focus();
+
+        DamageText.AnimateDamage(focus.Name + " " + damageAmount);
+       
         return focus.Cast(Attacker, Defender, damageAmount);
     }
 
@@ -68,9 +69,9 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateSlashDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
 
         Slash slash = new Slash();
+        DamageText.AnimateDamage(slash.Name + " " + damageAmount);
         return slash.Cast(Attacker, Defender, damageAmount);
     }
 
@@ -82,9 +83,10 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateAssassinateDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
 
         Assassinate assassinate = new Assassinate();
+
+        DamageText.AnimateDamage(assassinate.Name + " " + damageAmount);
         return assassinate.Cast(Attacker, Defender, damageAmount);
     }
 
@@ -96,9 +98,9 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateBloodBladeDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
 
         BloodBlade bloodBlade = new BloodBlade();
+        DamageText.AnimateDamage(bloodBlade.Name + " " + damageAmount);
         return bloodBlade.Cast(Attacker, Defender, damageAmount);
     }
 
@@ -110,9 +112,9 @@ public class Damage : MonoBehaviour
         
         DamageUtil damageUtil = new DamageUtil();
         int healAmount = damageUtil.CalculateHealAmount(Healer);
-        DamageText.AnimateHeal(healAmount);
 
         Heal heal = new Heal();
+        DamageText.AnimateDamage(heal.Name + " " + healAmount);
         return heal.Cast(Healer, Reciever, healAmount);
     }
 
@@ -124,9 +126,9 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateFlareDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
 
         Flare flare = new Flare();
+        DamageText.AnimateDamage(flare.Name + " " + damageAmount);
         return flare.Cast(Attacker, Defender, damageAmount);
     }
 
@@ -138,9 +140,9 @@ public class Damage : MonoBehaviour
 
         DamageUtil damageUtil = new DamageUtil();
         int damageAmount = damageUtil.CalculateWindDamage(Defender, Attacker);
-        DamageText.AnimateDamage(damageAmount);
 
         Wind wind = new Wind();
+        DamageText.AnimateDamage(wind.Name + " " + damageAmount);
         return wind.Cast(Attacker, Defender, damageAmount);
     }
 

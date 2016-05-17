@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Model;
+using Assets.Scripts.Model.Menu;
 using Assets.Scripts.Movement;
 using UnityEngine.UI;
 
@@ -48,8 +49,10 @@ public class CarouselController : MonoBehaviour
 
     private void MoveCharacter()
     {
-        if (NewCharacter == null) return;
+        if (GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State == MenuBar.States.Enabled) return;
+        if (IsPositionTaken()) return;
         if (GameObject.Find("Main Camera").GetComponent<MoveCamera>().IsAtCarousel()) return;
+        if (NewCharacter == null) PlaceCharacter();
         Vector2 pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         NewCharacter.transform.localPosition = new Vector3(pointer.x, -9f, pointer.y);
     }
@@ -82,11 +85,79 @@ public class CarouselController : MonoBehaviour
         GameObject.Find("Main Camera").GetComponent<MoveCamera>().MoveToCarousel();  
     }
 
+    public void SaveCharacters()
+    {
+        ApplicationModel.CharacterHolders = new List<CharacterHolder>();
+        GameObject characterController = Instantiate((GameObject)Resources.Load("CharacterController"));
+        characterController.name = "Characters";
+        foreach (var character in ChosenCharacters)
+        {
+            ApplicationModel.CharacterHolders.Add(character.GetComponent<CharacterHolder>());
+            character.transform.SetParent(characterController.transform);
+        }
+
+        LoadAI();
+        
+        DontDestroyOnLoad(characterController);
+    }
+
+    private void LoadAI()
+    {
+        
+        //Load one of each characters
+        //Wizard 
+        CreateAI("WizardAI", new Vector3(10, -9f, 3));
+
+        //Archer
+        CreateAI("ArcherAI", new Vector3(10, -9f, 5));
+
+        //Warrior
+        CreateAI("WarriorAI", new Vector3(9, -9f, 4));
+
+        //Assassin
+        CreateAI("AssassinAI", new Vector3(9, -9f, 6));
+
+        //Priest
+        CreateAI("PriestAI", new Vector3(10, -9f, 7));
+    }
+
+    private void CreateAI(string type, Vector3 position)
+    {
+        GameObject characterController = GameObject.Find("Characters");
+        NewCharacter = Instantiate((GameObject)Resources.Load(type));
+        NewCharacter.GetComponent<CharacterHolder>().enabled = false;
+        NewCharacter.GetComponent<Movement>().enabled = false;
+        NewCharacter.transform.localPosition = position;
+        NewCharacter.transform.localEulerAngles = new Vector3(NewCharacter.transform.localEulerAngles.x, NewCharacter.transform.localEulerAngles.y + 180, NewCharacter.transform.localEulerAngles.z);
+        NewCharacter.transform.SetParent(characterController.transform);
+        ChosenCharacters.Add(NewCharacter);
+    }
+
+
     public void PlaceCharacter()
     {
-        NewCharacter = Instantiate(CurrentCharacter);
+        if (IsPositionTaken())
+        {
+            MovePointer();
+        }
+        NewCharacter = Instantiate((GameObject) Resources.Load(CurrentCharacter.GetComponent<CarouselCharacterHolder>().Job.ToString()));
+        NewCharacter.GetComponent<CharacterHolder>().enabled = false;
+        NewCharacter.GetComponent<Movement>().enabled = false;
+
         Vector2 pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         NewCharacter.transform.localPosition = new Vector3(pointer.x, -9f, pointer.y);
+    }
+
+    private void MovePointer()
+    {
+        for (var i = 0; i < 2; i++)
+        {
+            for (var x = 0; x < 10; x++)
+            {
+                GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(new Vector2(i, x));
+                if (IsPositionTaken() == false) return;
+            }
+        }
     }
 
     public void RemoveCharacter()

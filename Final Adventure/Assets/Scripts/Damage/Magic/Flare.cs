@@ -11,6 +11,7 @@ namespace Assets.Scripts.Damage
             Power = 25f;
             Cost = 10f;
             Base = 200f;
+            Desc = "Powerful Fire Spell";
         }
 
         public override bool Cast(Character attacker, Character defender, int damage)

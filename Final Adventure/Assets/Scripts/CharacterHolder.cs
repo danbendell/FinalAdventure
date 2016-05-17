@@ -50,13 +50,16 @@ public class CharacterHolder : MonoBehaviour
                 Character = new Priest();
                 break;
         }
-        Character.Position = transform.position;
+        Character.Position = new Vector3(transform.position.x, GameObject.Find("Floor").GetComponent<FloorHighlight>().GetTileHeight(transform.position.x, transform.position.z), transform.position.z);
+        transform.localPosition = Character.Position;
 
         transform.GetComponent<Movement>().SetCharacter(Character);
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
+	    if (Character == null) return;
         KeyboardInput();
 	    CheckStatus();
 	}

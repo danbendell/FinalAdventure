@@ -4,10 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Abilities;
+using Assets.Scripts.Damage.Magic;
 using Assets.Scripts.Model;
 using Assets.Scripts.Movement;
 using Assets.Scripts.Util;
-using UnityEditor;
 using Flare = Assets.Scripts.Damage.Flare;
 
 public class AI : MonoBehaviour
@@ -45,27 +46,46 @@ public class AI : MonoBehaviour
 
     private delegate void Action();
 
-    private void Attack()
+    private void AttackCoroutine()
     {
         StartCoroutine(AttackCharacter());
     }
 
-    private void Flare()
+    private void FlareCoroutine()
     {
         StartCoroutine(FlareCharacter());
     }
 
-    private void Heal()
+    private void WindCoroutine()
+    {
+        StartCoroutine(WindCharacter());
+    }
+
+    private void HealCoroutine()
     {
         StartCoroutine(HealCharacter());
     }
 
-    private void Focus()
+    private void FocusCoroutine()
     {
         StartCoroutine(FocusCharacter());
     }
+    private void SlashCoroutine()
+    {
+        StartCoroutine(SlashCharacter());
+    }
 
-    private void Move()
+    private void AssassinateCoroutine()
+    {
+        StartCoroutine(AssassinateCharacter());
+    }
+
+    private void BloodBladeCoroutine()
+    {
+        StartCoroutine(BloodBladeCharacter());
+    }
+
+    private void MoveCoroutine()
     {
         StartCoroutine(MoveCharacter());
     }
@@ -146,6 +166,7 @@ public class AI : MonoBehaviour
             print("SELF CAST HEAL");
             //SelfCast
             SelfCast();
+            return;
         }
         //Decide what action to complete
         if (_isTargetOpposition)
@@ -194,9 +215,9 @@ public class AI : MonoBehaviour
         //foreach (var p in prob)
         //{
         //    print("Job = " + p.Job);
-        //    print("Attack = "  + p.Attack);
-        //    print("Move = " + p.Move);
-        //    print("Heal = " + p.Heal);
+        //    print("Attack = "  + p.AttackCoroutine);
+        //    print("Move = " + p.MoveCoroutine);
+        //    print("Heal = " + p.HealCoroutine);
         //}
     }
 
@@ -379,6 +400,8 @@ public class AI : MonoBehaviour
     private IEnumerator WalkTowardsPlayer()
     {
         yield return new WaitForSeconds(2.0f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterMovement();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
 
@@ -386,27 +409,37 @@ public class AI : MonoBehaviour
         //Want to walk next to th player, not on them
         if(flatPath[flatPath.Count - 1] == _targetPosition) flatPath = flatPath.GetRange(0, flatPath.Count - 1);
 
-        StartCoroutine(MovePointer(flatPath[_movementCount], Move));
+        StartCoroutine(MovePointer(flatPath[_movementCount], MoveCoroutine));
     }
 
     private IEnumerator WalkAwayFromPlayer()
     {
         yield return new WaitForSeconds(2.0f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterMovement();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
 
         var tempPosition = _targetPosition;
         _targetPosition = RunAwayFromTarget(_targetPosition);
+        if (_targetPosition == _character.XyPosition())
+        {
+            //Aready in the best position;
+            StartCoroutine(Wait());
+            yield break;
+        }
         SetFlatPath(new Vector2(0, _character.Speed));
         _targetPosition = tempPosition;
         _movementCount = 0;
-        StartCoroutine(MovePointer(flatPath[_movementCount], Move));
+        StartCoroutine(MovePointer(flatPath[_movementCount], MoveCoroutine));
 
     }
 
     private IEnumerator HighlightAttackRange()
     {
         yield return new WaitForSeconds(1f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
         GameObject.Find("Characters").GetComponent<CharactersController>().HighlightCharacterAttackRange();
         GameObject.Find("ActionBar").GetComponent<ActionBar>().State = MenuBar.States.Disabled;
         
@@ -418,7 +451,7 @@ public class AI : MonoBehaviour
         }
         else if (!_isTargetOpposition)
         {
-            StartCoroutine(MovePointer(flatPath[_movementCount], Heal));
+            StartCoroutine(MovePointer(flatPath[_movementCount], HealCoroutine));
         }
         else
         {
@@ -429,22 +462,42 @@ public class AI : MonoBehaviour
 
     private Action PickAnAction()
     {
-        if (_character.Job() == CharacterHolder.Jobs.Wizard)
-        {
-            Flare flare = new Flare();
-            if (_character.Mana > flare.Cost) return this.Flare;
-        }
-        else if (_character.Job() == CharacterHolder.Jobs.Archer)
+        Ability ability = _character.GetRandomAbility();
+
+        if (ability != null)
         {
             Focus focus = new Focus();
-            if (_character.Mana > focus.Cost) return this.Focus;
+            if (ability.Name == focus.Name) return this.FocusCoroutine;
+
+            Slash slash = new Slash();
+            if (ability.Name == slash.Name) return this.SlashCoroutine;
+
+            Assassinate assassinate = new Assassinate();
+            if (ability.Name == assassinate.Name) return this.AssassinateCoroutine;
+
+            BloodBlade bloodBlade = new BloodBlade();
+            if (ability.Name == bloodBlade.Name) return this.BloodBladeCoroutine;
         }
-        return Attack;
+        
+
+        Spell spell = _character.GetRandomSpell();
+
+        if (spell != null)
+        {
+             Flare flare = new Flare();
+            if (spell.Name == flare.Name) return this.FlareCoroutine;
+
+            Wind wind = new Wind();
+            if (spell.Name == wind.Name) return this.WindCoroutine;
+        }
+
+        return AttackCoroutine;
     }
 
     private IEnumerator MovePointer(Vector2 node, Action action)
     {
         yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
 
         GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(node);
 
@@ -606,12 +659,14 @@ public class AI : MonoBehaviour
     private void SelfCast()
     {
         GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPointerPosition(_position);
-        Heal();
+        HealCoroutine();
     }
 
     private IEnumerator MoveCharacter()
     {
         yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
         var floor = GameObject.Find("Floor").GetComponent<FloorHighlight>().FloorArray;
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Tile tile = floor[(int)pointer.x, (int)pointer.y];
@@ -627,7 +682,8 @@ public class AI : MonoBehaviour
     private IEnumerator AttackCharacter()
     {
         yield return new WaitForSeconds(0.5f);
-       
+        if (IsCurrentCharacterHolder() == false) yield break;
+
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Abilities abilities = new Abilities(_character, pointer);
         abilities.Attack();
@@ -638,6 +694,7 @@ public class AI : MonoBehaviour
     private IEnumerator HealCharacter()
     {
         yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
 
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Abilities abilities = new Abilities(_character, pointer);
@@ -646,9 +703,22 @@ public class AI : MonoBehaviour
         CheckMovement();
     }
 
+    private IEnumerator WindCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Wind();
+
+        CheckMovement();
+    }
+
     private IEnumerator FlareCharacter()
     {
         yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
 
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Abilities abilities = new Abilities(_character, pointer);
@@ -660,6 +730,7 @@ public class AI : MonoBehaviour
     private IEnumerator FocusCharacter()
     {
         yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
 
         var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
         Abilities abilities = new Abilities(_character, pointer);
@@ -668,10 +739,48 @@ public class AI : MonoBehaviour
         CheckMovement();
     }
 
+    private IEnumerator SlashCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Slash();
+
+        CheckMovement();
+    }
+
+    private IEnumerator AssassinateCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if(IsCurrentCharacterHolder() == false) yield break;
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.Assassinate();
+
+        CheckMovement();
+    }
+
+    private IEnumerator BloodBladeCharacter()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if (IsCurrentCharacterHolder() == false) yield break;
+
+        var pointer = GameObject.Find("Floor").GetComponent<FloorHighlight>().PointerPosition;
+        Abilities abilities = new Abilities(_character, pointer);
+        abilities.BloodBlade();
+
+        CheckMovement();
+    }
+
     private void CheckMovement()
     {
+
         CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
         CharacterHolder ch = cc.CurrentCharacterHolder;
+        CharacterHolder thisCH = transform.GetComponent<CharacterHolder>();
         if (ch.Turn.Moved) return;
 
         //Need to check in here to see if the AI wants to move away from its current position.
@@ -713,5 +822,13 @@ public class AI : MonoBehaviour
 
         print("WAITING");
         GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn.Skip();
+    }
+
+    private bool IsCurrentCharacterHolder()
+    {
+        CharactersController cc = GameObject.Find("Characters").GetComponent<CharactersController>();
+        CharacterHolder ch = cc.CurrentCharacterHolder;
+        CharacterHolder thisCH = transform.GetComponent<CharacterHolder>();
+        return (ch == thisCH);
     }
 }

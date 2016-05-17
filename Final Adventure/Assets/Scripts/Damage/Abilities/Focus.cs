@@ -14,6 +14,7 @@ public class Focus : Ability
         Cost = 5f;
         Base = 250f;
         AccuracyMod = 1.15f;
+        Desc = "Powerful ranged attack that increases accuracy";
     }
 
 }

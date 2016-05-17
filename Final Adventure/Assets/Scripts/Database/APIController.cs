@@ -11,7 +11,7 @@ using RestSharp.Serializers;
 public static class APIController
 {
 
-    private const string URL = "http://localhost:8070/api";
+    private const string URL = "http://178.62.63.37:8060/api";
     private const string TURN = "Turn";
 
     public static List<DTOTurn> TurnList = new List<DTOTurn>(); 

@@ -14,6 +14,7 @@ namespace Assets.Scripts.Damage.Magic
             Power = 25f;
             Cost = 10f;
             Base = 200f;
+            Desc = "Powerful air Spell";
         }
 
         public override bool Cast(Character attacker, Character defender, int damage)

@@ -35,7 +35,7 @@ public class BayesianProbability
         {
             Probabilities cp = new Probabilities(characterHolder.Job)
             {
-                Attack = ProbabilityOfAttackNew(characterHolder),
+                Attack = ProbabilityOfAttackGivenMovementNew(characterHolder),
                 Move = ProbabilityOfMovement(characterHolder),
                 Heal = ProbabilityOfHealNew(characterHolder)
             };
@@ -44,7 +44,7 @@ public class BayesianProbability
         }
     }
 
-    private float ProbabilityOfAttackNew(CharacterHolder characterHolder)
+    private float ProbabilityOfAttackGivenMovementNew(CharacterHolder characterHolder)
     {
         float AINearCharacter = CalcNumberOfAIAround(characterHolder);
         float allyNearCharacter = CalcNumberOfAlliesAround(characterHolder);
@@ -55,9 +55,7 @@ public class BayesianProbability
         float strength = characterHolder.Character.Strength;
         float defence = _AI.Character.Defence;
 
-        float mod = 1.0f;
-        if (characterHolder.Job == CharacterHolder.Jobs.Archer) mod = 1.2f;
-        if (characterHolder.Job == CharacterHolder.Jobs.Warrior) mod = 1.2f;
+        float mod = characterHolder.Character.AttackProbabilityModifier;
 
         float allies = allyNearCharacter / AINearCharacter;
         float health = TargetPercentHP / AIPercentHP;
@@ -68,6 +66,33 @@ public class BayesianProbability
         if (result > 1f) result = 1f;
 
         if (!InAttackRange(_AI, characterHolder)) result = 0f;
+        return result;
+    }
+
+    private float ProbabilityOfAttackGivenNoMovement(CharacterHolder characterHolder)
+    {
+        float AINearCharacter = CalcNumberOfAIAround(characterHolder);
+        float allyNearCharacter = CalcNumberOfAlliesAround(characterHolder);
+
+        float AIPercentHP = CalcPercentHP(_AI);
+        float TargetPercentHP = CalcPercentHP(characterHolder);
+
+        float strength = characterHolder.Character.Strength;
+        float defence = _AI.Character.Defence;
+
+        float mod = characterHolder.Character.AttackProbabilityModifier;
+
+        float allies = allyNearCharacter / AINearCharacter;
+        float health = TargetPercentHP / AIPercentHP;
+        float stats = strength / defence;
+
+        float result = (allies * (health * stats)) * mod;
+        result = Mathf.Round(result * 100f) / 100f;
+        if (result > 1f) result = 1f;
+
+        var distanceFromAI = CalcDistance(_AI, characterHolder);
+        var attackRange = characterHolder.Character.AttackRange.y;
+        if (attackRange > distanceFromAI) result = 0f;
         return result;
     }
 
@@ -83,17 +108,21 @@ public class BayesianProbability
             //Current health is high, no need retreat
             if (characterPercentHP > 0.75f)
             {
-                movementProbability = 0.25f;
+                //Using a higher grade than one to allow for a 10percetile random choice
+                // 1.1 - 0.8 = 0.3 % 
+                movementProbability = 1.1f - characterPercentHP;
             }
             if (characterPercentHP < 0.4f)
             {
-                movementProbability = 0.75f;
+                // 1.1 - 0.3 = 0.8 % 
+                movementProbability = 1.1f - characterPercentHP;
             }
         }
         else
         {
             movementProbability = 0.5f;
         }
+        if (movementProbability > 1) movementProbability = 0.9f;
 
         return movementProbability;
     }
@@ -162,10 +191,7 @@ public class BayesianProbability
         //OH = Opposition Total Health
         //AH = Ally Total Health
 
-        float mod = 1f;
-        if (characterHolder.Job == CharacterHolder.Jobs.Wizard) mod = 1.5f;
-        if (characterHolder.Job == CharacterHolder.Jobs.Archer) mod = 0.8f;
-        if (characterHolder.Job == CharacterHolder.Jobs.Warrior) mod = 0.7f;
+        float mod = characterHolder.Character.HealProbabilityModifier;
 
         List<float> calcIndividualDamageProb = new List<float>();
         foreach (var damage in damageTakenPercent)

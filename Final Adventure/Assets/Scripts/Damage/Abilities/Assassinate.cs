@@ -14,6 +14,7 @@ namespace Assets.Scripts.Damage.Abilities
             Power = 20f;
             Cost = 5f;
             Base = 250f;
+            Desc = "Physical attack that scales on missing HP";
         }
 
     }
