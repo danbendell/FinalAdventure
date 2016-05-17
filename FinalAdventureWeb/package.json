@@ -1,0 +1,12 @@
+{
+  "name": "FinalAdventureWeb",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "express": "^4.11.2",
+    "msnodesqlv8": "^0.1.40",
+    "mssql": "^3.3.0",
+    "node-sqlserver-unofficial": "^1.4.0"
+  }
+}

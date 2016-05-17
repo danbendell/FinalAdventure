@@ -4,6 +4,11 @@
 /[Bb]uild/
 /[Bb]uilds/
 /Assets/AssetStoreTools*
+/[Ts]estBuild_Data/
+
+TestBuild_data/
+TestBuild.exe
+*.pdb
 
 Library/
 Temp/
