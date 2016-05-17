@@ -29,6 +29,7 @@ public class AbilityBar : SubMenuBar
 	// Update is called once per frame
 	void Update () {
         CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+        if (CC.CurrentCharacterHolder == null) return;
         if (CC.CurrentCharacterHolder.IsAi) return;
 
         UpdateSubMenu();

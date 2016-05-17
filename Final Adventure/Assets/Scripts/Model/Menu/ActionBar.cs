@@ -32,6 +32,7 @@ public class ActionBar : MenuBar
     void Update()
     {
         CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+        if (CC.CurrentCharacterHolder == null) return;
         if (CC.CurrentCharacterHolder.IsAi) return;
 
         UpdateMenu();
