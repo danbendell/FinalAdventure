@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GamePause : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GamePause : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+	    if (GameObject.Find("Canvas").GetComponent<EndGameController>() == null) return;
 	    isEndGame = GameObject.Find("Canvas").GetComponent<EndGameController>().EndGame.activeSelf;
 	    if (isEndGame) return;
 
