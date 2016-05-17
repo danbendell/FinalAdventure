@@ -27,6 +27,9 @@ public class Warrior : Character {
 
         AttackRange = new Vector2(0, 1);
 
+        AttackProbabilityModifier = 1.2f;
+        HealProbabilityModifier = 0.7f;
+
         Abilities = new List<Ability>();
         Abilities.Add(new Slash());
         //Possible things for the future like increase magic or magic resist

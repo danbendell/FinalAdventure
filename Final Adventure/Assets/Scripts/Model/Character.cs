@@ -42,6 +42,10 @@ namespace Assets.Scripts.Model
 
         public List<Ability> Abilities { get; protected set; }
 
+        public float AttackProbabilityModifier { get; set; }
+
+        public float HealProbabilityModifier { get; set; }
+
         public virtual CharacterHolder.Jobs Job()
         {
             return CharacterHolder.Jobs.Wizard;
@@ -67,6 +71,33 @@ namespace Assets.Scripts.Model
         public float Height()
         {
             return Position.y;
+        }
+
+        public Ability GetRandomAbility()
+        {
+            List<Ability> castableAbilities = new List<Ability>();
+            foreach (var ability in Abilities)
+            {
+                if(ability.Cost < Mana) castableAbilities.Add(ability);
+            }
+            if (castableAbilities.Count == 0) return null;
+            int randomValue = Random.Range(0, castableAbilities.Count - 1);
+            return castableAbilities[randomValue];
+        }
+
+        public Spell GetRandomSpell()
+        {
+            List<Spell> castableSpells = new List<Spell>();
+            foreach (var spell in Spells)
+            {
+                if(spell.Name == "Heal") continue; 
+                if (spell.Cost < Mana) castableSpells.Add(spell);
+            }
+
+            if (castableSpells.Count == 0) return null;
+
+            int randomValue = Random.Range(0, castableSpells.Count - 1);
+            return castableSpells[randomValue];
         }
     }
 }

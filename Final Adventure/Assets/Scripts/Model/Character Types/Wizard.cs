@@ -12,7 +12,7 @@ namespace Assets.Scripts.Model
         public Wizard()
         {
             MaxHealth = 20;
-            Health = 20;
+            Health = 2;
             MaxMana = 50;
             Mana = 50;
 
@@ -29,6 +29,9 @@ namespace Assets.Scripts.Model
 
             AttackRange = new Vector2(0, 1);
 
+            AttackProbabilityModifier = 1f;
+            HealProbabilityModifier = 1.5f;
+            
             Abilities = new List<Ability>();
             //Possible things for the future like increase magic or magic resist
 

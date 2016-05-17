@@ -25,8 +25,9 @@ public class Rotation : MonoBehaviour
 	void Update ()
 	{
         CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+	    if (CC.CurrentCharacterHolder == null) return;
         _characterHolder = CC.CurrentCharacterHolder;
-
+        
         Active = !(_characterHolder.Turn.Moved && _characterHolder.Turn.CompletedAction);
         if (!Active) return;
 

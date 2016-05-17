@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CarouselBarItem : MenuBarItem
@@ -61,6 +62,7 @@ public class CarouselBarItem : MenuBarItem
         switch (Option)
         {
             case Options.Select:
+                GameObject.Find("Canvas").GetComponent<MoreInfo>().MoreInfoGameObject.SetActive(false);
                 GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().PlaceCharacter();
                 GameObject.Find("CarouselBar").GetComponent<CarouselBar>().State = MenuBar.States.Hidden;
                 GameObject.Find("MapBar").GetComponent<MapBar>().State = MenuBar.States.Enabled;
@@ -72,9 +74,12 @@ public class CarouselBarItem : MenuBarItem
                     .MoveToMap();
                 break;
             case Options.Info:
+                GameObject.Find("Canvas").GetComponent<MoreInfo>().MoreInfoGameObject.SetActive(true);
                 break;
             case Options.Play:
-                Application.LoadLevel("MainScene");
+                GameObject.Find("Canvas").GetComponent<MoreInfo>().MoreInfoGameObject.SetActive(false);
+                GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().SaveCharacters();
+                SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
                 break;
         }
     }

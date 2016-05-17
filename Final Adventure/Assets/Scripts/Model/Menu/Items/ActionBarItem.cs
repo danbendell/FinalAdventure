@@ -40,6 +40,7 @@ public class ActionBarItem : MenuBarItem
     public override void Update()
     {
         base.Update();
+        if (GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder == null) return;
         Turn turn = GameObject.Find("Characters").GetComponent<CharactersController>().CurrentCharacterHolder.Turn;
         switch (Action)
         {

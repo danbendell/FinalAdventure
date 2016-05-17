@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Runtime.InteropServices;
 using Assets.Scripts.Damage;
 using Assets.Scripts.Damage.Abilities;
 using UnityEngine.UI;
@@ -31,11 +32,6 @@ public class MapBarItem : SubMenuBarItem
                 if (GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().IsPositionTaken()) DisableItem();
                 else if (GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().ChosenCharacters.Count == 5) DisableItem();
                 else EnableItem();
-                if (GameObject.Find("MapBar").GetComponent<MapBar>().State != MenuBar.States.Enabled) return;
-                if (Active && GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().NewCharacter == null)
-                {
-                    GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().PlaceCharacter();
-                }
                 break;
             case Options.Remove:
                 if (Active) GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().RemoveCharacter();

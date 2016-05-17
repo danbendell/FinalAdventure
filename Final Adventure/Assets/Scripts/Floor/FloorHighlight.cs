@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Assets.Scripts.Model;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Assets.Scripts.Movement
@@ -102,6 +101,7 @@ namespace Assets.Scripts.Movement
 
         private void KeyboardInput()
         {
+            if (GameObject.Find("Canvas").GetComponent<GamePause>().isPaused) return;
             if (Input.GetKeyDown(KeyCode.A))
             {
                 if(PointerPosition.x > 0)
@@ -259,6 +259,11 @@ namespace Assets.Scripts.Movement
        
         }
 
+        public float GetTileHeight(float x, float y)
+        {
+            Tile tile = FloorArray[(int)x, (int)y];
+            return tile.GetHeight();
+        }
         public List<Vector3> AddTileHeights(List<Vector2> flatPath)
         {
             List<Vector3> modifiedPath = new List<Vector3>();

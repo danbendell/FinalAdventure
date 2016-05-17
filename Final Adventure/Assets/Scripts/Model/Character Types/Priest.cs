@@ -21,13 +21,17 @@ namespace Assets.Scripts.Model.Character_Types
             Magic = 18;
             Resist = 12;
 
-            Speed = 3;
+            Speed = 4;
             Accuracy = 10;
             Evasion = 10;
             Luck = 5;
             CritChance = 5;
 
             AttackRange = new Vector2(0, 1);
+
+
+            AttackProbabilityModifier = 0.8f;
+            HealProbabilityModifier = 1.6f;
 
             Spells = new List<Spell>();
             Spells.Add(new Heal());

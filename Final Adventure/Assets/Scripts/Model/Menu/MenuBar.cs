@@ -42,7 +42,11 @@ public abstract class MenuBar : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	public void UpdateMenu () {
+	public void UpdateMenu ()
+	{
+
+	    if (GameObject.Find("Canvas").GetComponent<GamePause>().isPaused) return;
+	    if (GameObject.Find("Canvas").GetComponent<GamePause>().isEndGame) return;
 
         if (Input.GetKeyDown(KeyCode.Return))
         {

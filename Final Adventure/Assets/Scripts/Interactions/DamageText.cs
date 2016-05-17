@@ -22,25 +22,21 @@ public class DamageText : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-	    if (Input.GetKeyDown(KeyCode.H))
-	    {
-	        AnimateDamage(5);
-	    }
         GameObject.GetComponent<RectTransform>().anchoredPosition3D = Vector3.Lerp(GameObject.GetComponent<RectTransform>().anchoredPosition3D, new Vector3(GameObject.GetComponent<RectTransform>().anchoredPosition3D.x, _yPosition, GameObject.GetComponent<RectTransform>().anchoredPosition3D.z), 3 * Time.deltaTime);
         _text.color = new Color(_text.color.r, _text.color.g, _text.color.b, Mathf.Lerp(_text.color.a, _alpha, 5 * Time.deltaTime));
     }
 
-    public void AnimateDamage(int value)
+    public void AnimateDamage(string value)
     {
         _text.color = _red;
-        _text.text = value.ToString();
+        _text.text = value;
         StartCoroutine(Animate());
     }
 
-    public void AnimateHeal(int value)
+    public void AnimateHeal(string value)
     {
         _text.color = _green;
-        _text.text = value.ToString();
+        _text.text = value;
         StartCoroutine(Animate());
     }
 

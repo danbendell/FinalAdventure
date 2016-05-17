@@ -24,6 +24,8 @@ public class MagicBar : SubMenuBar
 
     void Update()
     {
+        CharactersController CC = GameObject.Find("Characters").GetComponent<CharactersController>();
+        if (CC.CurrentCharacterHolder.IsAi) return;
 
         UpdateSubMenu();
 

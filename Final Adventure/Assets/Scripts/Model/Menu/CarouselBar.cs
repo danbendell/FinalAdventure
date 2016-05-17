@@ -36,6 +36,7 @@ public class CarouselBar : MenuBar
 
         if (Input.GetKeyDown(KeyCode.RightShift))
         {
+            GameObject.Find("Canvas").GetComponent<MoreInfo>().MoreInfoGameObject.SetActive(false);
             if (State == MenuBar.States.Enabled) return;
             GameObject.Find("Main Camera").GetComponent<MoveCamera>().MoveToCarousel();
             GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().RemoveCharacter();

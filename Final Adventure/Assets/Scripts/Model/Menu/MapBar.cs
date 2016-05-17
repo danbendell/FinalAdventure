@@ -122,6 +122,7 @@ public class MapBar : SubMenuBar
             {
                 State = States.Hidden;
                 Option = MapBarItem.Options.None;
+                GameObject.Find("CharacterCarousel").GetComponent<CarouselController>().RemoveCharacter();
                 GameObject.Find("CarouselBar").GetComponent<MenuBar>().State = MenuBar.States.Enabled;
             }
 

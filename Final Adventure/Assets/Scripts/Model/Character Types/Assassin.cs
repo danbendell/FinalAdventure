@@ -31,6 +31,9 @@ namespace Assets.Scripts.Model.Character_Types
 
             AttackRange = new Vector2(0, 1);
 
+            AttackProbabilityModifier = 1.3f;
+            HealProbabilityModifier = 0.7f;
+
             Spells = new List<Spell>();
             Spells.Add(new Heal());
 

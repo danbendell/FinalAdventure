@@ -31,6 +31,7 @@ public class Movement : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+	    if (_character == null) return;
         if (transform.position != _character.Position)
         { 
             MoveCharacter();
@@ -104,6 +105,8 @@ public class Movement : MonoBehaviour
 
     private void SetPosition(Vector3 position)
     {
+        print("CharacterPos " + _character.Position);
+        print("Pos " + position);
         _character.Position = position;
 
         CreateOptimalPath();
@@ -124,6 +127,11 @@ public class Movement : MonoBehaviour
 
         _optimalMovementPath = GameObject.Find("Floor").GetComponent<FloorHighlight>().AddTileHeights(flatPath);
         _movementCount = 0;
+        if (_optimalMovementPath.Count == 0)
+        {
+            _nextTile = startLocation;
+            return;
+        }
         _nextTile = _optimalMovementPath[_movementCount];
     }
 }
