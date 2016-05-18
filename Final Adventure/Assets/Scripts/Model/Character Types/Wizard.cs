@@ -12,7 +12,7 @@ namespace Assets.Scripts.Model
         public Wizard()
         {
             MaxHealth = 20;
-            Health = 2;
+            Health = 20;
             MaxMana = 50;
             Mana = 50;
 
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Model
             Luck = 5;
             CritChance = 5;
 
-            AttackRange = new Vector2(0, 1);
+            AttackRange = new Vector2(0, 3);
 
             AttackProbabilityModifier = 1f;
             HealProbabilityModifier = 1.5f;

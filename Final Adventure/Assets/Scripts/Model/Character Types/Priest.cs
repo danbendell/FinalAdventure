@@ -13,7 +13,7 @@ namespace Assets.Scripts.Model.Character_Types
         public Priest()
         {
             MaxHealth = 18;
-            Health = 1;
+            Health = 18;
             MaxMana = 50;
             Mana = 50;
 
@@ -28,7 +28,7 @@ namespace Assets.Scripts.Model.Character_Types
             Luck = 5;
             CritChance = 5;
 
-            AttackRange = new Vector2(0, 1);
+            AttackRange = new Vector2(0, 3);
 
 
             AttackProbabilityModifier = 0.8f;

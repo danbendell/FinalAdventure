@@ -14,7 +14,7 @@ namespace Assets.Scripts.Model.Character_Types
         public Assassin()
         {
             MaxHealth = 16;
-            Health = 1;
+            Health = 16;
             MaxMana = 20;
             Mana = 20;
 
