@@ -56,6 +56,10 @@ public class ActionBarItem : MenuBarItem
                 if (turn.CompletedAction) DisableItem();
                 else EnableItem();
                 break;
+            case Actions.Ability:
+                if (turn.CompletedAction) DisableItem();
+                else EnableItem();
+                break;
             case Actions.Wait:
                 if(turn.CompletedAction && turn.Moved) DisableItem();
                 else EnableItem();

@@ -99,7 +99,17 @@ public class ActionBar : MenuBar
 
     public override void Show()
     {
-        base.Show();
+        StartCoroutine(DelayedShow());
+        //base.Show();
+        //State = States.Enabled;
+        //GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = States.Hidden;
+        //GameObject.Find("MagicBar").GetComponent<MagicBar>().State = States.Hidden;
+    }
+
+    private IEnumerator DelayedShow()
+    {
+        yield return new WaitForSeconds(0.2f);
+        State = States.Enabled;
         GameObject.Find("AbilityBar").GetComponent<AbilityBar>().State = States.Hidden;
         GameObject.Find("MagicBar").GetComponent<MagicBar>().State = States.Hidden;
     }

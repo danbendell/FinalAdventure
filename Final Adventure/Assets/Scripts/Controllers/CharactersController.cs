@@ -19,17 +19,7 @@ public class CharactersController : MonoBehaviour
         set
         {
             _currentCharacterHolder = value;
-            _currentCharacterHolder.Turn = new Turn();
-            SetUpAPIData(!_currentCharacterHolder.IsAi);
-            GetAPIData();
-            GameObject.Find("CurrentCharacterParticles").GetComponent<FollowTarget>().BeginFollow();
-            GameObject.Find("Menus").GetComponent<MenuController>().Refresh(_currentCharacterHolder);
-            GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(_currentCharacterHolder.Character.XyPosition());
-            if (_currentCharacterHolder.IsAi)
-            {
-                AI ai = _currentCharacterHolder.transform.GetComponent<AI>();
-                StartCoroutine(ai.BeginTurn());
-            }
+            
         }
     }
 
@@ -66,7 +56,7 @@ public class CharactersController : MonoBehaviour
         {
             characterHolder.Load();
         }
-        CurrentCharacterHolder = CharacterHolders[0];
+        SetNextCharacterHolder(CharacterHolders[0]);
     }
 	
 	// Update is called once per frame
@@ -74,6 +64,12 @@ public class CharactersController : MonoBehaviour
 	{
 	    if (GameObject.Find("Canvas").GetComponent<GamePause>().isEndGame) return;
 	    if (CurrentCharacterHolder == null) return;
+
+	    if (Input.GetKeyDown(KeyCode.Tab))
+	    {
+	        CurrentCharacterHolder.Turn.Skip();
+	    }
+
 	    CheckTurnStatus();
 	    CheckPointerPosition();
 	    CheckDeadStatus();
@@ -144,8 +140,24 @@ public class CharactersController : MonoBehaviour
         {
             if (CharacterHolders[i] != CurrentCharacterHolder) continue;
             _turnNumber = i + 1 >= CharacterHolders.Count ? 0 : i + 1;
-            CurrentCharacterHolder = CharacterHolders[_turnNumber];
+            SetNextCharacterHolder(CharacterHolders[_turnNumber]);
             break;
+        }
+    }
+
+    private void SetNextCharacterHolder(CharacterHolder characterHolder)
+    {
+        CurrentCharacterHolder = characterHolder;
+        CurrentCharacterHolder.Turn = new Turn();
+        SetUpAPIData(!CurrentCharacterHolder.IsAi);
+        GetAPIData();
+        GameObject.Find("CurrentCharacterParticles").GetComponent<FollowTarget>().BeginFollow();
+        GameObject.Find("Menus").GetComponent<MenuController>().Refresh(CurrentCharacterHolder);
+        GameObject.Find("Floor").GetComponent<FloorHighlight>().SetPosition(CurrentCharacterHolder.Character.XyPosition());
+        if (CurrentCharacterHolder.IsAi)
+        {
+            AI ai = CurrentCharacterHolder.transform.GetComponent<AI>();
+            StartCoroutine(ai.BeginTurn());
         }
     }
 
@@ -175,8 +187,8 @@ public class CharactersController : MonoBehaviour
         int totalAllyCount = GetTotalCharacterCount(isHuman);
         int totalOppositionCount = GetTotalCharacterCount(!isHuman);
         string job = _currentCharacterHolder.Job.ToString();
-        float healthPercent = CalculateUtil.CalcPercentHP(_currentCharacterHolder);
-        float manaPercent = CalculateUtil.CalcPercentMP(_currentCharacterHolder);
+        float healthPercent = CalculateUtil.CalcPercentHP(_currentCharacterHolder) * 100;
+        float manaPercent = CalculateUtil.CalcPercentMP(_currentCharacterHolder) * 100;
 
         APIController.SetData(surroundingAllyCount, surroundingOppostionCount, totalAllyCount, totalOppositionCount, job, healthPercent, manaPercent);
     }

@@ -161,7 +161,8 @@ public class AI : MonoBehaviour
 
     private void CompleteAction(float distance)
     {
-        if (distance == 0)
+        Heal heal = new Heal();
+        if (distance == 0 && _character.Mana >= heal.Cost)
         {
             print("SELF CAST HEAL");
             //SelfCast

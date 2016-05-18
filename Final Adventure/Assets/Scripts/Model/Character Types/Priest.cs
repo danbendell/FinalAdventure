@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Assets.Scripts.Damage;
+using Assets.Scripts.Damage.Magic;
 using UnityEngine;
 
 namespace Assets.Scripts.Model.Character_Types
@@ -12,7 +13,7 @@ namespace Assets.Scripts.Model.Character_Types
         public Priest()
         {
             MaxHealth = 18;
-            Health = 18;
+            Health = 1;
             MaxMana = 50;
             Mana = 50;
 
@@ -35,9 +36,9 @@ namespace Assets.Scripts.Model.Character_Types
 
             Spells = new List<Spell>();
             Spells.Add(new Heal());
+            Spells.Add(new Wind());
 
             Abilities = new List<Ability>();
-            Abilities.Add(new Focus());
 
         }
 

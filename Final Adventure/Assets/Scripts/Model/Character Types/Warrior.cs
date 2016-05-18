@@ -10,7 +10,7 @@ public class Warrior : Character {
     public Warrior()
     {
         MaxHealth = 25;
-        Health = 25;
+        Health = 2;
         MaxMana = 16;
         Mana = 16;
 
